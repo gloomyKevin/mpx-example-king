@@ -11,7 +11,7 @@
 </script>
 
 <style>
-  .bg-yellow-300 {
+  /* .bg-yellow-300 {
     --tw-bg-opacity: 1;
     background-color: rgba(252, 211, 77, var(--tw-bg-opacity));
   }
@@ -21,11 +21,12 @@
 
   .w-200px {
     width: 200px;
-  }
+  } */
 </style>
 
 <script type="application/json">
   {
+    "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {}
   }

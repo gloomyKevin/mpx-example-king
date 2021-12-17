@@ -12,7 +12,7 @@
 </script>
 
 <style>
-  .bg-yellow-600 {
+  /* .bg-yellow-600 {
     --tw-bg-opacity: 1;
     background-color: rgba(217, 119, 6, var(--tw-bg-opacity));
   }
@@ -22,11 +22,12 @@
 
   .w-400px {
     width: 400px;
-  }
+  } */
 </style>
 
 <script type="application/json">
   {
+    "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {
       "layer2": "./comp-mainpage1-layer2.mpx"
