@@ -5,6 +5,7 @@
   <button bindtap="handleTap(4)">点击跳:分包2-页面1</button>
   <button bindtap="handleTap(5)">点击跳:分包2-页面2</button>
   <com-mainpage2 />
+  <view class="text-4xl">There is mainpage2</view>
 </template>
 
 <script lang="ts" src="../index.ts"></script>
@@ -46,6 +47,13 @@
     }
   })
 </script>
+
+<style>
+  .text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+</style>
 
 <script type="application/json">
   {

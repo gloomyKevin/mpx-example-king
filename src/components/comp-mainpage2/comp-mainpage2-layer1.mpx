@@ -1,5 +1,5 @@
 <template>
-  <view class="bg-red-600 h-400px w-400px">
+  <view class="bg-red-600 h-20 w-screen flex-col flex justify-center items-center">
     comp-mainpage2-layer1
     <layer2 />
   </view>
@@ -16,12 +16,23 @@
     --tw-bg-opacity: 1;
     background-color: rgba(220, 38, 38, var(--tw-bg-opacity));
   }
-  .h-400px {
-    height: 400px;
+  .h-20 {
+    height: 20rem;
   }
-
-  .w-400px {
-    width: 400px;
+  .w-screen {
+    width: 100vw;
+  }
+  .flex-col {
+    flex-direction: column;
+  }
+  .flex {
+    display: flex
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .items-center {
+    align-items: center;
   } */
 </style>
 

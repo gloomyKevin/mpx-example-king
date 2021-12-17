@@ -1,4 +1,8 @@
-const { defaultPreset } = require('mpx-tailwindcss-preset')
+const { defaultPreset, createPreset } = require('mpx-tailwindcss-preset')
 module.exports = {
-  presets: [defaultPreset]
+  presets: [
+    defaultPreset,
+    createPreset({
+      rem2rpx: false
+    })]
 }
