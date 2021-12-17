@@ -3,6 +3,7 @@
 <style>
   /*此处编写全局样式*/
   @import '../tailwindOutput.wxss';
+  @import '../postcssOutput.css';
 </style>
 
 <script type="application/json">
