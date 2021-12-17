@@ -1,5 +1,5 @@
 <template>
-  <view class="bg-blue-300 h-200px w-200px">
+  <view class="bg-blue-300">
     subpackage1-page2-layer2
   </view>
 </template>
@@ -14,13 +14,6 @@
   .bg-blue-300 {
     --tw-bg-opacity: 1;
     background-color: rgba(147, 197, 253, var(--tw-bg-opacity));
-  }
-  .h-200px {
-    height: 200px;
-  }
-
-  .w-200px {
-    width: 200px;
   }
 </style>
 

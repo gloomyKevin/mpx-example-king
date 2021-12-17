@@ -1,5 +1,5 @@
 <template>
-  <view class="bg-pink-300 h-200px w-200px">
+  <view class="bg-pink-300">
     subpackage2-page2-layer2
   </view>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <view class="bg-gradient-to-r from-green-400 to-blue-500">
+  <view class="bg-gradient-to-r from-green-400 to-blue-500 mt-40 h-10">
     comp-cross-layer1
     <layer2 />
   </view>
@@ -15,14 +15,18 @@
   .bg-gradient-to-r {
     background-image: linear-gradient(to right, var(--tw-gradient-stops));
   }
-
   .from-green-400 {
     --tw-gradient-from: #4ade80;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(74 222 128 / 0));
   }
-
   .to-blue-500 {
     --tw-gradient-to: #3b82f6;
+  }
+  .mt-40 {
+    margin-top: 40px;
+  }
+  .h-10 {
+    height: 10rem;
   }
 </style>
 
