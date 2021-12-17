@@ -1,6 +1,6 @@
 <template>
   <view class="bg-yellow-600 h-400px w-400px">
-    comp-mainpage1
+    comp-mainpage1-layer1
     <layer2 />
   </view>
 </template>
