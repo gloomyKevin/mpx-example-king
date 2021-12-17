@@ -1,0 +1,36 @@
+<template>
+  <view class="bg-gradient-to-r from-green-400 to-blue-500">
+    comp-cross-layer1
+    <layer2 />
+  </view>
+</template>
+
+<script>
+  import { createComponent } from '@mpxjs/core'
+
+  createComponent({})
+</script>
+
+<style>
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+
+  .from-green-400 {
+    --tw-gradient-from: #4ade80;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(74 222 128 / 0));
+  }
+
+  .to-blue-500 {
+    --tw-gradient-to: #3b82f6;
+  }
+</style>
+
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {
+
+    }
+  }
+</script>

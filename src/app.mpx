@@ -7,7 +7,24 @@
 <script type="application/json">
   {
     "pages": [
-      "./pages/index"
+      "./pages/mainpage1/index",
+      "./pages/mainpage2/index"
+    ],
+    "subPackages": [
+      {
+        "root": "subpackage/subpackage1",
+        "pages": [
+          "./subpackage1-page1/index",
+          "./subpackage1-page2/index"
+        ]
+      },
+      {
+        "root": "subpackage/subpackage2",
+        "pages": [
+          "./subpackage2-page1/index",
+          "./subpackage2-page2/index"
+        ]
+      }
     ]
   }
 </script>

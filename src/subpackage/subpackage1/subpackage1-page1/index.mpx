@@ -1,0 +1,23 @@
+<template>
+  <view>这里是subPackage1-page1</view>
+  <subpackage1-page1-layer1 />
+  <comp-cross />
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    onLoad () {}
+  })
+</script>
+
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {
+      "subpackage1-page1-layer1": "../../../components/comp-subpackage1-page1/subpackage1-page1-layer1",
+      "comp-cross": "../../../components/comp-cross/comp-cross-layer1"
+    }
+  }
+</script>

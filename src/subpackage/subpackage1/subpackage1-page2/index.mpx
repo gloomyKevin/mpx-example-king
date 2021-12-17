@@ -1,0 +1,21 @@
+<template>
+  <view>这里是subPackage1-page2</view>
+  <subpackage1-page2-layer1 />
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    onLoad () {}
+  })
+</script>
+
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {
+      "subpackage1-page2-layer1": "../../../components/comp-subpackage1-page2/subpackage1-page2-layer1"
+    }
+  }
+</script>

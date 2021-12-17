@@ -1,0 +1,57 @@
+<template>
+  <button bindtap="handleTap(1)">点击跳:主包-页面2</button>
+  <button bindtap="handleTap(2)">点击跳:分包1-页面1</button>
+  <button bindtap="handleTap(3)">点击跳:分包1-页面2</button>
+  <button bindtap="handleTap(4)">点击跳:分包2-页面1</button>
+  <button bindtap="handleTap(5)">点击跳:分包2-页面2</button>
+  <com-mainpage1 />
+</template>
+
+<script lang="ts" src="../index.ts"></script>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  import mainpage2 from '../mainpage2/index.mpx?resolve'
+  import subPackage1Page1 from '../../subpackage/subpackage1/subpackage1-page1/index.mpx?resolve'
+  import subPackage1Page2 from '../../subpackage/subpackage1/subpackage1-page2/index.mpx?resolve'
+  import subPackage2Page1 from '../../subpackage/subpackage2/subpackage2-page1/index.mpx?resolve'
+  import subPackage2Page2 from '../../subpackage/subpackage2/subpackage2-page2/index.mpx?resolve'
+
+  createPage({
+    onLoad () {},
+    methods: {
+      handleTap (type) {
+        let url = ''
+        switch (type) {
+          case 1:
+            url = mainpage2
+            break
+          case 2:
+            url = subPackage1Page1
+            break
+          case 3:
+            url = subPackage1Page2
+            break
+          case 4:
+            url = subPackage2Page1
+            break
+          case 5:
+            url = subPackage2Page2
+            break
+        }
+        wx.navigateTo({
+          url: url
+        })
+      }
+    }
+  })
+</script>
+
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {
+      "com-mainpage1": "../../components/comp-mainpage1/comp-mainpage1-layer1"
+    }
+  }
+</script>
