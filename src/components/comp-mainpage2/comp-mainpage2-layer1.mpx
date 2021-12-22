@@ -12,7 +12,7 @@
 </script>
 
 <style>
-  .bg-red-600 {
+  /* .bg-red-600 {
     --tw-bg-opacity: 1;
     background-color: rgba(220, 38, 38, var(--tw-bg-opacity));
   }
@@ -33,11 +33,12 @@
   }
   .items-center {
     align-items: center;
-  }
+  } */
 </style>
 
 <script type="application/json">
   {
+    "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {
       "layer2": "./comp-mainpage2-layer2.mpx"
