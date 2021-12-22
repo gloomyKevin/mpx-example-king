@@ -95,7 +95,7 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
     const subAbsFileStat = await fs.stat(subAbsFilePath)
     if (subPackageFile === 'components') {
       // 组件级别开启 styleIsolation
-      await configStyleIsolation(subAbsFilePath, true)
+      await configStyleIsolation(subAbsFilePath, SWITCH_STYLE_ISOLATION)
     } else if (path.extname(subAbsFilePath) === '.wxml') {
       // 页面级别自动 import 分包输出样式文件
       const subAbsStylePath = subAbsFilePath.slice(0, subAbsFilePath.length - 5) + '.wxss'
@@ -136,11 +136,8 @@ const recursiveScanFiles = async currentPath => {
         // 输出 index.wxss 到分包 root
         const outPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
         shell.exec(`npx tailwindcss build ${fromPath} -c ${configPath} -o ${outPath}`)
-        // TODO
         // 自动导入分包样式
         await autoImportSubPackageStyle(currentAbsPath, outPath)
-        // 是否开启样式隔离
-        // await configStyleIsolation()
       } else if (isDirectory) {
         // 深度扫描
         await recursiveScanFiles(currentAbsPath)
