@@ -11,15 +11,14 @@
 </script>
 
 <style>
-  /* .bg-green-300 {
+  .bg-green-300 {
     --tw-bg-opacity: 1;
     background-color: rgba(110, 231, 183, var(--tw-bg-opacity));
-  } */
+  }
 </style>
 
 <script type="application/json">
   {
-    "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {}
   }
