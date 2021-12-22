@@ -1,5 +1,5 @@
 <template>
-  <view class="font-bold">这里是subPackage1-page2</view>
+  <view>这里是subPackage1-page2</view>
   <subpackage1-page2-layer1 />
 </template>
 

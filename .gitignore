@@ -6,5 +6,3 @@ deploy/
 output/
 dist/
 .vscode/
-# tailwindOutput.wxss
-postcssOutput.css

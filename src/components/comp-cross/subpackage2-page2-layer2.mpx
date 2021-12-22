@@ -26,7 +26,6 @@
 
 <script type="application/json">
   {
-    "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {}
   }
