@@ -17,7 +17,8 @@
     "test": "jest",
     "build:test": "npm run build && jest",
     "build:dll": "node ./build/buildDll.js",
-    "help": "node ./build/build.js --help"
+    "help": "node ./build/build.js --help",
+    "tail:post": "postcss ./tailwind.css -o ./postcssOutput.css"
   },
   "author": "gloomyKevin",
   "license": "ISC",
