@@ -18,7 +18,6 @@
     "build:test": "npm run build && jest",
     "build:dll": "node ./build/buildDll.js",
     "help": "node ./build/build.js --help",
-    "tail:cli": "node ./build/build.js && node ./scripts/index.js -w",
     "tail:post": "postcss ./tailwind.css -o ./postcssOutput.css"
   },
   "author": "gloomyKevin",

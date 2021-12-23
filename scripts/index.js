@@ -99,13 +99,20 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
     } else if (path.extname(subAbsFilePath) === '.wxml') {
       // 页面级别自动 import 分包输出样式文件
       const subAbsStylePath = subAbsFilePath.slice(0, subAbsFilePath.length - 5) + '.wxss'
+      const autoImportStr = `@import "${subPackageImportPath}"; \n`
       const exist = await fileIsExist(subAbsStylePath)
       if (exist) {
-        const data = await fs.readFile((subAbsStylePath))
-        await fs.writeFile(subAbsStylePath, `@import "${subPackageImportPath}"; \n ${data}`)
+        let data = await fs.readFile(subAbsStylePath, 'utf-8')
+        let autoImportStrIndex = data.indexOf(autoImportStr)
+        // 避免重复引入问题
+        if (autoImportStrIndex !== -1) {
+          data = data.replace(autoImportStr, '')
+        }
+        // 写入 import 内容
+        await fs.writeFile(subAbsStylePath, `${autoImportStr} ${data}`)
       } else {
         // 直接创建文件并写入
-        await fs.writeFile(subAbsStylePath, `@import "${subPackageImportPath}"; \n`)
+        await fs.writeFile(subAbsStylePath, autoImportStr)
       }
     } else if (subAbsFileStat.isDirectory()) {
       await autoImportSubPackageStyle(subAbsFilePath, subPackageImportPath)
@@ -148,8 +155,7 @@ const recursiveScanFiles = async currentPath => {
   }
 }
 
-(async () => {
-  log('===== start =====')
-  await recursiveScanFiles(outputPath)
-  log('===== end =====')
-})()
+module.exports = {
+  outputPath,
+  recursiveScanFiles
+}
