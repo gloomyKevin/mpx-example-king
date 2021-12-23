@@ -4,8 +4,8 @@ const path = require('path')
 const shell = require('shelljs')
 const chalk = require('chalk')
 
-// 样式隔离开关
-const SWITCH_STYLE_ISOLATION = true
+// 样式隔离 styleIsolation 开启样式隔离
+const SWITCH_STYLE_ISOLATION = 'apply-shared'
 
 // 日志输出带颜色
 const log = (...args) => console.log(chalk.cyan(...args))
@@ -54,10 +54,10 @@ const getSubpackageMap = async () => {
 /**
  * 配置样式隔离
  * @param {string} componentsFiles 组件目录下文件
- * @param {boolean} open 默认开启
+ * @param {string} styleIsolation 默认值为 apply-shared
  * @returns {Promise<void>}
  */
-const configStyleIsolation = async (componentsFiles, open = true) => {
+const configStyleIsolation = async (componentsFiles, styleIsolation = SWITCH_STYLE_ISOLATION) => {
   try {
     const folderFiles = await fs.readdir(componentsFiles)
     for (let i = 0, len = folderFiles.length; i < len; i++) {
@@ -65,12 +65,12 @@ const configStyleIsolation = async (componentsFiles, open = true) => {
       const folderAbsFile = path.resolve(componentsFiles, folderFile)
       const folderFileStat = await fs.stat(folderAbsFile)
       if (folderFileStat.isDirectory()) {
-        await configStyleIsolation(folderAbsFile, SWITCH_STYLE_ISOLATION)
+        await configStyleIsolation(folderAbsFile)
       } else if (path.extname(folderFile) === '.json') {
         const data = await fs.readFile(folderAbsFile, 'utf-8')
         const jsonObject = JSON.parse(data)
-        if (open) {
-          jsonObject.styleIsolation = 'apply-shared'
+        if (!jsonObject.styleIsolation) {
+          jsonObject.styleIsolation = styleIsolation
         }
         await fs.writeFile(folderAbsFile, JSON.stringify(jsonObject))
       }
@@ -95,10 +95,10 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
     const subAbsFileStat = await fs.stat(subAbsFilePath)
     if (subPackageFile === 'components') {
       // 组件级别开启 styleIsolation
-      await configStyleIsolation(subAbsFilePath, SWITCH_STYLE_ISOLATION)
+      await configStyleIsolation(subAbsFilePath)
     } else if (path.extname(subAbsFilePath) === '.wxml') {
       // 页面级别自动 import 分包输出样式文件
-      const subAbsStylePath = subAbsFilePath.slice(0, subAbsFilePath.length - 5) + '.wxss'
+      const subAbsStylePath = path.resolve(path.dirname(subAbsFilePath), path.basename(subAbsFilePath, path.extname(subAbsFilePath)) + '.wxss')
       const autoImportStr = `@import "${subPackageImportPath}"; \n`
       const exist = await fileIsExist(subAbsStylePath)
       if (exist) {
