@@ -1,6 +1,7 @@
 const fs = require('fs/promises')
 const { constants } = require('fs')
 const path = require('path')
+// const program = require('commander')
 const shell = require('shelljs')
 const chalk = require('chalk')
 
@@ -163,7 +164,12 @@ const recursiveScanFiles = async currentPath => {
           Logger.error('sorry, this script requires npx, please update npm version!')
           shell.exit(1)
         }
-        shell.exec(`npx tailwindcss build ${fromPath} -c ${configPath} -o ${outPath}`)
+        // program
+        //   .usage('tailwind')
+        //   .option('-w, --watch', '开启 tailwind 监听')
+        //   .parse(process.argv)
+        // program.args()
+        shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
         // 自动导入分包样式
         await autoImportSubPackageStyle(currentAbsPath, outPath)
       } else if (isDirectory) {
@@ -180,9 +186,11 @@ const recursiveScanFiles = async currentPath => {
  * 初始化方法
  */
 async function init () {
+  Logger.warning('==========tailwind compile start==========')
   console.time('tailwind build time')
   await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  Logger.warning('==========tailwind compile end==========')
   console.timeEnd('tailwind build time')
 }
 
-module.exports = init
+init()

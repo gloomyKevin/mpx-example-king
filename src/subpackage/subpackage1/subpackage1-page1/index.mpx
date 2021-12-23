@@ -1,5 +1,5 @@
 <template>
-  <view class="font-bold justify-end justify-start">这里是subPackage1-page1</view>
+  <view class="font-bold justify-center">这里是subPackage1-page1</view>
   <subpackage1-page1-layer1 />
   <comp-cross />
 </template>
