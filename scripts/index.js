@@ -3,6 +3,7 @@ const { constants } = require('fs')
 const path = require('path')
 const shell = require('shelljs')
 const chalk = require('chalk')
+const process = require('process')
 
 // 样式隔离 styleIsolation 开启样式隔离
 const SWITCH_STYLE_ISOLATION = 'apply-shared'
@@ -87,7 +88,8 @@ const configStyleIsolation = async (componentsFiles, styleIsolation = SWITCH_STY
  * @returns {Promise<void>}
  */
 const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath) => {
-  // TODO 相关分包下文件自动 import 分包构建出来的 wxss 样式，若对应分包文件下的 wxss 文件不存在，则自动创建
+  // 自动注入内容
+  const autoImportStr = `@import "${path.relative(subPackageAbsPath, subPackageImportPath)}"; \n`
   const subPackageFiles = await fs.readdir(subPackageAbsPath)
   for (let i = 0, len = subPackageFiles.length; i < len; i++) {
     const subPackageFile = subPackageFiles[i]
@@ -99,7 +101,6 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
     } else if (path.extname(subAbsFilePath) === '.wxml') {
       // 页面级别自动 import 分包输出样式文件
       const subAbsStylePath = path.resolve(path.dirname(subAbsFilePath), path.basename(subAbsFilePath, path.extname(subAbsFilePath)) + '.wxss')
-      const autoImportStr = `@import "${subPackageImportPath}"; \n`
       const exist = await fileIsExist(subAbsStylePath)
       if (exist) {
         let data = await fs.readFile(subAbsStylePath, 'utf-8')
