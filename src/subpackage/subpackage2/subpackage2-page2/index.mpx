@@ -11,6 +11,11 @@
   })
 </script>
 
+<style lang="stylus">
+view
+  background-color: #f00
+</style>
+
 <script type="application/json">
   {
     "component": true,
