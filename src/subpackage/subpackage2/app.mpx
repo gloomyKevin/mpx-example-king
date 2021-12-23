@@ -1,8 +1,8 @@
 <script name="json">
   module.exports = {
     pages: [
-      './subpackage2-page1/index',
-      './subpackage2-page2/index'
+      './pages/subpackage2-page1/index',
+      './pages/subpackage2-page2/index'
     ]
   }
 </script>
