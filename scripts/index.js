@@ -1,9 +1,9 @@
 const fs = require('fs/promises')
 const { constants } = require('fs')
 const path = require('path')
+// const program = require('commander')
 const shell = require('shelljs')
 const chalk = require('chalk')
-const process = require('process')
 
 // 基本配置
 const TailwindBaseConfig = {
@@ -15,8 +15,23 @@ const TailwindBaseConfig = {
   outputPath: path.resolve(__dirname, '../dist/wx')
 }
 
-// 日志输出带颜色
-const log = (...args) => console.log(chalk.cyan(...args))
+/**
+ * 日志输出
+ * @class
+ */
+class Logger {
+  static info (...args) {
+    shell.echo(chalk.cyan(...args))
+  }
+
+  static error (...args) {
+    shell.echo(chalk.red(...args))
+  }
+
+  static warning (...args) {
+    shell.echo(chalk.yellow(...args))
+  }
+}
 
 /**
  * 判断文件是否存在
@@ -145,7 +160,16 @@ const recursiveScanFiles = async currentPath => {
         const configPath = path.resolve(__dirname, '../tailwind.config.js')
         // 输出 index.wxss 到分包 root
         const outPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
-        shell.exec(`npx tailwindcss build ${fromPath} -c ${configPath} -o ${outPath}`)
+        if (!shell.which('npx')) {
+          Logger.error('sorry, this script requires npx, please update npm version!')
+          shell.exit(1)
+        }
+        // program
+        //   .usage('tailwind')
+        //   .option('-w, --watch', '开启 tailwind 监听')
+        //   .parse(process.argv)
+        // program.args()
+        shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
         // 自动导入分包样式
         await autoImportSubPackageStyle(currentAbsPath, outPath)
       } else if (isDirectory) {
@@ -162,9 +186,11 @@ const recursiveScanFiles = async currentPath => {
  * 初始化方法
  */
 async function init () {
+  Logger.warning('==========tailwind compile start==========')
   console.time('tailwind build time')
   await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  Logger.warning('==========tailwind compile end==========')
   console.timeEnd('tailwind build time')
 }
 
-module.exports = init
+init()
