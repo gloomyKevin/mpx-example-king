@@ -5,6 +5,7 @@ const program = require('commander')
 const { userConf, supportedModes } = require('../config/index')
 const getWebpackConf = require('./getWebpackConf')
 const { resolveDist, getRootPath } = require('./utils')
+const { outputPath, recursiveScanFiles } = require('../scripts/index')
 
 program
   .option('-w, --watch', 'watch mode')
@@ -100,12 +101,12 @@ try {
 }
 
 if (program.watch) {
-  webpack(webpackConfs).watch(undefined, callback)
+  webpack(webpackConfs).watch(undefined, callback);
 } else {
   webpack(webpackConfs, callback)
 }
 
-function callback (err, stats) {
+async function callback (err, stats) {
   if (err) {
     process.exitCode = 1
     return console.error(err)
@@ -136,6 +137,8 @@ function callback (err, stats) {
   if (stats.hasErrors()) {
     console.log(chalk.red('  Build failed with errors.\n'))
   } else if (program.watch) {
+    // TODO something
+    await recursiveScanFiles(outputPath)
     console.log(chalk.cyan(`  Build complete at ${new Date()}.\n  Still watching...\n`))
   } else {
     console.log(chalk.cyan('  Build complete.\n'))
