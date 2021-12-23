@@ -158,7 +158,13 @@ const recursiveScanFiles = async currentPath => {
   }
 }
 
-module.exports = {
-  outputPath: TailwindBaseConfig.outputPath,
-  recursiveScanFiles
+/**
+ * 初始化方法
+ */
+async function init () {
+  console.time('tailwind build time')
+  await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  console.timeEnd('tailwind build time')
 }
+
+module.exports = init
