@@ -5,14 +5,18 @@ const shell = require('shelljs')
 const chalk = require('chalk')
 const process = require('process')
 
-// 样式隔离 styleIsolation 开启样式隔离
-const SWITCH_STYLE_ISOLATION = 'apply-shared'
+// 基本配置
+const TailwindBaseConfig = {
+  // 样式隔离 styleIsolation 开启样式隔离
+  SWITCH_STYLE_ISOLATION: 'apply-shared',
+  // 全局分包 map 映射
+  subPackageMap: new Map(),
+  // 默认输出 dist 路径
+  outputPath: path.resolve(__dirname, '../dist/wx')
+}
 
 // 日志输出带颜色
 const log = (...args) => console.log(chalk.cyan(...args))
-
-// 默认输出 dist 路径
-const outputPath = path.resolve(__dirname, '../dist/wx')
 
 /**
  * 判断文件是否存在
@@ -31,22 +35,20 @@ const fileIsExist = async fileName => {
 }
 
 /**
- * 获取分包配置信息
- * @returns {Promise<Map>}
+ * 设置分包配置信息
+ * @returns {Promise<void>}
  */
-const getSubpackageMap = async () => {
+const setSubpackageMap = async () => {
   try {
-    const subPackageMap = new Map()
-    const data = await fs.readFile(path.resolve(outputPath, './app.json'), 'utf8')
+    const data = await fs.readFile(path.resolve(TailwindBaseConfig.outputPath, './app.json'), 'utf8')
     const jsonObject = JSON.parse(data)
     const subPackages = jsonObject.subPackages
     for (let i = 0, len = subPackages.length; i < len; i++) {
       let item = subPackages[i]
       let root = item.root
-      const resolveSubPackagePath = path.resolve(outputPath, root)
-      subPackageMap.set(resolveSubPackagePath, true)
+      const resolveSubPackagePath = path.resolve(TailwindBaseConfig.outputPath, root)
+      TailwindBaseConfig.subPackageMap.set(resolveSubPackagePath, item)
     }
-    return subPackageMap
   } catch (err) {
     throw err
   }
@@ -58,7 +60,7 @@ const getSubpackageMap = async () => {
  * @param {string} styleIsolation 默认值为 apply-shared
  * @returns {Promise<void>}
  */
-const configStyleIsolation = async (componentsFiles, styleIsolation = SWITCH_STYLE_ISOLATION) => {
+const configStyleIsolation = async (componentsFiles, styleIsolation = TailwindBaseConfig.SWITCH_STYLE_ISOLATION) => {
   try {
     const folderFiles = await fs.readdir(componentsFiles)
     for (let i = 0, len = folderFiles.length; i < len; i++) {
@@ -135,9 +137,9 @@ const recursiveScanFiles = async currentPath => {
       const currentAbsPath = path.resolve(currentPath, currentFile)
       const currentAbsStat = await fs.stat(currentAbsPath)
       const isDirectory = currentAbsStat.isDirectory()
-      // 获取分包映射 map
-      const subPackageMap = await getSubpackageMap()
-      if (subPackageMap.get(currentAbsPath)) {
+      // 设置分包映射 map
+      await setSubpackageMap()
+      if (TailwindBaseConfig.subPackageMap.has(currentAbsPath)) {
         // 分包路径下创建相关页面
         const fromPath = path.resolve(__dirname, '../tailwind.css')
         const configPath = path.resolve(__dirname, '../tailwind.config.js')
@@ -156,7 +158,13 @@ const recursiveScanFiles = async currentPath => {
   }
 }
 
-module.exports = {
-  outputPath,
-  recursiveScanFiles
+/**
+ * 初始化方法
+ */
+async function init () {
+  console.time('tailwind build time')
+  await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  console.timeEnd('tailwind build time')
 }
+
+module.exports = init

@@ -5,7 +5,7 @@ const program = require('commander')
 const { userConf, supportedModes } = require('../config/index')
 const getWebpackConf = require('./getWebpackConf')
 const { resolveDist, getRootPath } = require('./utils')
-const { outputPath, recursiveScanFiles } = require('../scripts/index')
+const initTailwind = require('../scripts')
 
 program
   .option('-w, --watch', 'watch mode')
@@ -138,7 +138,7 @@ async function callback (err, stats) {
     console.log(chalk.red('  Build failed with errors.\n'))
   } else if (program.watch) {
     // TODO something
-    await recursiveScanFiles(outputPath)
+    await initTailwind()
     console.log(chalk.cyan(`  Build complete at ${new Date()}.\n  Still watching...\n`))
   } else {
     console.log(chalk.cyan('  Build complete.\n'))
