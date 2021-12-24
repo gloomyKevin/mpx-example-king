@@ -1,14 +1,13 @@
 const fg = require('fast-glob');
-const { readdir } = require('fs/promises')
 const fs = require('fs');
 const path = require('path')
 const postcss = require('postcss');
-const { sortAndDeduplicateDiagnostics } = require('typescript');
+
 const commonStyle = '/commonStyle.css'
 
 const example = ['dist/wx/subpackage/subpackage1/','dist/wx/subpackage/subpackage2/']
 
-function normalizeFiles(fileDir){
+function normalizeFiles(fileDir=['']){
   fileDir = fileDir.map((path)=>{
     return path + '**/*.wxss'
   })
@@ -76,24 +75,27 @@ const postCssCollect = (options = {})  => {
           atRule += node.value
         })
       })
-      // console.log('atRule',atRule)
       classCollection.push(atRule)
     }
   }
 }
 
 function normalizeClass(subpackageFiles,commonClass){
-  // console.log('normalizeClass',subpackageFiles,commonClass)
   for(let subpackage in subpackageFiles){
-    const subpackageCommonRoot = postcss.parse('')
+    let subpackageCommonRoot = postcss.parse('')
+    for(let i in commonClass[subpackage]) { commonClass[subpackage][i] = 1 }
     subpackageFiles[subpackage].map((file)=>{
       fs.readFile(file, (err,data)=>{
         if(err) throw err
         postcss(postCssNormallize({
           subpackageCommonRoot,
-          commonClass:commonClass[subpackage]
+          commonClass:commonClass[subpackage],
+          importClass:path.join(file,'../../../',`${commonStyle}`)
         })).process(data).then(function(res){
-          // console.log('${subpackage}${commonStyle}',`${subpackage}${commonStyle}`)
+          fs.writeFile(`${file}`,res.css,()=>{
+            if (err) throw err;
+            // console.log('The file has been saved!');
+          })
           fs.writeFile(`${subpackage}${commonStyle}`,subpackageCommonRoot.toString(),()=>{
             if (err) throw err;
             // console.log('The file has been saved!');
@@ -105,31 +107,38 @@ function normalizeClass(subpackageFiles,commonClass){
 }
 
 const postCssNormallize = (options = {})  => {
-  const { subpackageCommonRoot, commonClass } = options
-  // console.log('commonClass',commonClass)
+  const { subpackageCommonRoot, commonClass, importClass } = options
+  let appendImport = false
   return {
     postcssPlugin:'postcss-delete-add',
     Rule(node) {
-      if(node.parent.type === 'root' && commonClass[node.selector]){
-        subpackageCommonRoot.append(node)
-        node.parent.remove(node)
-        commonClass[node.selector] = false
+      if(node.parent.type === 'root'){
+        if(commonClass[node.selector]){
+          if(!appendImport){
+            appendImport = true
+            node.parent.prepend(new postcss.AtRule({ name: 'import', params: `\"${importClass}\"` }))
+          }
+          commonClass[node.selector] === 1 && subpackageCommonRoot.append(node.clone())
+          node.parent.removeChild(node)
+          commonClass[node.selector] = commonClass[node.selector] + 1
+        }
       }
     },
     AtRule(node) {
       let atRule = node.name + node.params 
-      node.nodes.forEach((rule)=>{
-        atRule += rule.selector
-        rule.nodes.forEach((node)=>{
-          atRule += node.prop 
-          atRule += node.value
-        })
-      })
-      if(commonClass[atRule]){
-        subpackageCommonRoot.append(node)
-        node.parent.remove(node)
-        commonClass[atRule] = false
-      }
+      // node.nodes.forEach((rule)=>{
+      //   atRule += rule.selector
+      //   rule.nodes.forEach((node)=>{
+      //     atRule += node.prop 
+      //     atRule += node.value
+      //   })
+      // })
+      // console.log('commonClass[atRule]',atRule,commonClass[atRule])
+      // if(commonClass[atRule]){
+      //   commonClass[node.selector] === 1 && subpackageCommonRoot.append(node)
+      //   node.parent.removeChild(node)
+      //   commonClass[atRule] += 1
+      // }
     }
   }
 }
