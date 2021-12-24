@@ -1,9 +1,11 @@
+// import { createFinalPreset } from './presets/bridge'
 const fs = require('fs/promises')
 const { constants } = require('fs')
 const path = require('path')
 // const program = require('commander')
 const shell = require('shelljs')
 const chalk = require('chalk')
+const { createFinalPreset } = require('./presets/bridge')
 
 // 基本配置
 const TailwindBaseConfig = {
@@ -47,6 +49,11 @@ const fileIsExist = async fileName => {
     flag = false
   }
   return flag
+}
+
+const setPresetCfgContent = (subpackageRoot) => {
+  // TODO 根路径暂时先写死，后续统一改
+  return `../../dist/wx/${subpackageRoot}/**/*.wxml`
 }
 
 /**
@@ -157,13 +164,25 @@ const recursiveScanFiles = async currentPath => {
       if (TailwindBaseConfig.subPackageMap.has(currentAbsPath)) {
         // 分包路径下创建相关页面
         const fromPath = path.resolve(__dirname, '../tailwind.css')
-        const configPath = path.resolve(__dirname, '../tailwind.config.js')
+        // TODO 改为用cosmiconfig查找config
+        const configPath = path.resolve(__dirname, './presets/tailwind.config.js')
         // 输出 index.wxss 到分包 root
         const outPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
         if (!shell.which('npx')) {
           Logger.error('sorry, this script requires npx, please update npm version!')
           shell.exit(1)
         }
+        let res = setPresetCfgContent(TailwindBaseConfig.subPackageMap.get(currentAbsPath).root)
+
+        // only for test
+        let obj, contentArr
+        contentArr = []
+        obj = Object.create(null)
+        contentArr.push(res)
+        obj.content = contentArr
+        createFinalPreset(obj)
+
+        // console.log('=========')
         // program
         //   .usage('tailwind')
         //   .option('-w, --watch', '开启 tailwind 监听')
@@ -182,15 +201,28 @@ const recursiveScanFiles = async currentPath => {
   }
 }
 
+// class calculateInterval {
+//   recordTime() {
+//     return process.hrtime.bigint()
+//   }
+
+//   logTimeInterval (end, start) {
+//     Logger.info('Done in', (end - start) / BigInt(1e6) + 'ms.')
+//   }
+// }
+
 /**
  * 初始化方法
  */
 async function init () {
   Logger.warning('==========tailwind compile start==========')
+  // let start = calculateInterval.recordTime
   console.time('tailwind build time')
   await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  // let start = calculateInterval.recordTime
   Logger.warning('==========tailwind compile end==========')
   console.timeEnd('tailwind build time')
+  // TODO 计算总时间
 }
 
 init()
