@@ -7,36 +7,80 @@ const commonStyle = '/commonStyle.css'
 
 const example = ['dist/wx/subpackage/subpackage1/','dist/wx/subpackage/subpackage2/']
 
-function normalizeFiles(fileDir=['']){
-  fileDir = fileDir.map((path)=>{
-    return path + '**/*.wxss'
-  })
-  files = fg.sync(fileDir);
+const fileRoot = 'dist/wx'
+// console.log('dadasfasf',fg.sync('dist/wx/**', { onlyFiles: false, deep: 1 }))
+const normalizeFiles = (fileDir = [], fileRoot = 'dist/wx', needAllFileClass = false) => {
+  if(needAllFileClass && !fileRoot){
+    console.log('如果是需要提取整个文件的公共样式, 需要写扫描文件入口! 如果不需要可以不传 needAllFileClass 参数')
+    return
+  }
+  let files = []
   const subpackageFiles = {}
+  const allFiles = {}
+  if(needAllFileClass && !fileDir.length){ //扫描所有文件
+    fileDir = ['**/*.wxss']
+  }else if(needAllFileClass && fileDir.length){ //扫描部分分包和总目录下所有wxss
+    fileDir = fileDir.map((path)=>{
+      return path + '**/*.wxss'
+    })
+    fileDir = fileDir.concat([`${fileRoot}/pages/**/*.wxss`,`${fileRoot}/components/**/*.wxss`])
+  }else if(!needAllFileClass && fileDir.length){ //只需要扫描部分分包 
+    fileDir = fileDir.map((path)=>{
+      return path + '**/*.wxss'
+    })
+  }
+  if(files.includes(`${fileRoot}/app.wxss`)){
+    const appIndex = files.findIndex(`${fileRoot}/app.wxss`)
+    files.split(appIndex,1)
+  }
+  files = fg.sync(fileDir);
+  // console.log('files',files)
   files.map((file)=>{
-    if(!subpackageFiles[path.resolve(file,'../../../')]){
+    if(!allFiles[path.resolve(file,'../../')] && 
+      (file.includes(`${fileRoot}/pages`) || file.includes(`${fileRoot}/components`))
+    ){
+      allFiles[path.resolve(file,'../../')] = []
+    }
+
+    if(!subpackageFiles[path.resolve(file,'../../../')] && 
+      (!file.includes(`${fileRoot}/pages`) && !file.includes(`${fileRoot}/components`))
+      ){
       subpackageFiles[path.resolve(file,'../../../')] = []
     }
-    if(path.resolve(file).indexOf(path.resolve(file,'../../../')) > -1){
+
+    if(allFiles[path.resolve(file,'../../')] && 
+      (file.includes(`${fileRoot}/pages`) || file.includes(`${fileRoot}/components`))){
+      allFiles[path.resolve(file,'../../')].push(file)
+    }
+    
+    if(subpackageFiles[path.resolve(file,'../../../')] &&
+      (!file.includes(`${fileRoot}/pages`) && !file.includes(`${fileRoot}/components`))
+      ){
       subpackageFiles[path.resolve(file,'../../../')].push(file)
     }
   })
-  return subpackageFiles
+  return {
+    allFiles,
+    subpackageFiles
+  }
 }
 
-async function collectClass(subpackageFiles){
+const collectClass = async (Files) => {
+  if(!Object.keys(Files).length) return 
+
   let AllClass = {}
   let promiseArr = []
-  for(let subpackage in subpackageFiles){
-    AllClass[subpackage]= new Array(subpackageFiles[subpackage].length)
-    subpackageFiles[subpackage].forEach((file,index)=>{
-      AllClass[subpackage][index]=[]
+
+  for(let filePackage in Files){
+    AllClass[filePackage]= new Array(Files[filePackage].length)
+    Files[filePackage].forEach((file,index)=>{
+      AllClass[filePackage][index]=[]
       promiseArr.push(
         new Promise((resolve,reject)=>{
           fs.readFile(file, (err,data) => {
             if(err) reject(err)
             postcss(postCssCollect({
-              classCollection: AllClass[subpackage][index]
+              classCollection: AllClass[filePackage][index]
             })).process(data).then(()=>{
               resolve()
             }).catch((err)=>{
@@ -66,21 +110,34 @@ const postCssCollect = (options = {})  => {
         classCollection.push(node.selector)
       }
     },
-    AtRule(node) {
-      let atRule = node.name + node.params 
-      node.nodes.forEach((rule)=>{
-        atRule += rule.selector
-        rule.nodes.forEach((node)=>{
-          atRule += node.prop 
-          atRule += node.value
+    AtRule: {
+      media: (atRule) => {
+        let commonRule = atRule.name + atRule.params 
+        atRule.nodes.forEach((rule)=>{
+          commonRule += rule.selector
+          rule.nodes.forEach((node)=>{
+            commonRule += node.prop 
+            commonRule += node.value
+          })
         })
-      })
-      classCollection.push(atRule)
+        classCollection.push(commonRule)
+      },
+      keyframes: (atRule) => {
+        let commonRule = atRule.name + atRule.params 
+        atRule.nodes.forEach((rule)=>{
+          commonRule += rule.selector
+          rule.nodes.forEach((node)=>{
+            commonRule += node.prop 
+            commonRule += node.value
+          })
+        })
+        classCollection.push(commonRule)
+      }
     }
   }
 }
 
-function normalizeClass(subpackageFiles,commonClass){
+const normalizeSubpackageClass = (subpackageFiles,commonClass) => {
   for(let subpackage in subpackageFiles){
     let subpackageCommonRoot = postcss.parse('')
     for(let i in commonClass[subpackage]) { commonClass[subpackage][i] = 1 }
@@ -97,6 +154,32 @@ function normalizeClass(subpackageFiles,commonClass){
             // console.log('The file has been saved!');
           })
           fs.writeFile(`${subpackage}${commonStyle}`,subpackageCommonRoot.toString(),()=>{
+            if (err) throw err;
+            // console.log('The file has been saved!');
+          })
+        });
+      })
+    })
+  }
+}
+
+const normalizeClass = async (files,commonClass,importClass) => {
+  for(let i in commonClass) { commonClass[i] = 1 }
+  let subpackageCommonRoot = postcss.parse('')
+  for(let fileName in files){
+    files[fileName].map((file)=>{
+      fs.readFile(file, (err,data)=>{
+        if(err) throw err
+        postcss(postCssNormallize({
+          subpackageCommonRoot,
+          commonClass:commonClass,
+          importClass:path.join(importClass,`${commonStyle}`)
+        })).process(data).then(function(res){
+          fs.writeFile(`${file}`,res.css,()=>{
+            if (err) throw err;
+            // console.log('The file has been saved!');
+          })
+          fs.writeFile(path.join(importClass,`${commonStyle}`),subpackageCommonRoot.toString(),()=>{
             if (err) throw err;
             // console.log('The file has been saved!');
           })
@@ -124,26 +207,50 @@ const postCssNormallize = (options = {})  => {
         }
       }
     },
-    AtRule(node) {
-      let atRule = node.name + node.params 
-      // node.nodes.forEach((rule)=>{
-      //   atRule += rule.selector
-      //   rule.nodes.forEach((node)=>{
-      //     atRule += node.prop 
-      //     atRule += node.value
-      //   })
-      // })
-      // console.log('commonClass[atRule]',atRule,commonClass[atRule])
-      // if(commonClass[atRule]){
-      //   commonClass[node.selector] === 1 && subpackageCommonRoot.append(node)
-      //   node.parent.removeChild(node)
-      //   commonClass[atRule] += 1
-      // }
+    AtRule: {
+      media: (atRule) => {
+        let commonAtRule = atRule.name + atRule.params 
+        atRule.nodes.forEach((rule)=>{
+          commonAtRule += rule.selector
+          rule.nodes.forEach((node)=>{
+            commonAtRule += node.prop 
+            commonAtRule += node.value
+          })
+        })
+        if(commonClass[commonAtRule]){
+          if(!appendImport){
+            appendImport = true
+            atRule.parent.prepend(new postcss.AtRule({ name: 'import', params: `\"${importClass}\"` }))
+          }
+          commonClass[commonAtRule] === 1 && subpackageCommonRoot.append(atRule.clone())
+          atRule.parent.removeChild(atRule)
+          commonClass[commonAtRule] += 1
+        }
+      },
+      keyframes: (atRule) => {
+        let commonAtRule = atRule.name + atRule.params 
+        atRule.nodes.forEach((rule)=>{
+          commonAtRule += rule.selector
+          rule.nodes.forEach((node)=>{
+            commonAtRule += node.prop 
+            commonAtRule += node.value
+          })
+        })
+        if(commonClass[commonAtRule]){
+          if(!appendImport){
+            appendImport = true
+            atRule.parent.prepend(new postcss.AtRule({ name: 'import', params: `\"${importClass}\"` }))
+          }
+          commonClass[commonAtRule] === 1 && subpackageCommonRoot.append(atRule.clone())
+          atRule.parent.removeChild(atRule)
+          commonClass[commonAtRule] += 1
+        }
+      }
     }
   }
 }
 
-const compareClass = (subpackagesArr) => {
+const compareSubpackageClass = (subpackagesArr) => {
   let commonClassObj = {}
   for(let subpackage in subpackagesArr){
     commonClassObj[subpackage] = {}
@@ -164,12 +271,46 @@ const compareClass = (subpackagesArr) => {
       }
     }
   }
+  console.log('compareSubpackageClass',commonClassObj)
   return commonClassObj
 }
 
-const normalFiles = normalizeFiles(example)
+const compareClass = (filesArr) => {
+  let commonClassObj = {}
+  for(let file in filesArr){
+    filesArr[file].forEach(classItem => {
+      if(!commonClassObj[classItem]) {
+        commonClassObj[classItem] = 1
+      }else{
+        commonClassObj[classItem] += 1
+      }
+    })
+  }
+  for(let commonClass in commonClassObj){
+    if(commonClassObj[commonClass] === 1){
+      delete commonClassObj[commonClass]
+    }
+  }
+  console.log('compareClass',commonClassObj)
+  return commonClassObj
+}
 
-collectClass(normalFiles).then((res)=>{
-  normalizeClass(normalFiles, compareClass(res))
-})
+const flattenAndUnique = (classMap) => {
+  for(let key in classMap){
+    classMap[key] = Array.from(new Set(classMap[key].flat()))
+  }
+  return classMap
+}
+
+const { subpackageFiles, allFiles } = normalizeFiles(example, fileRoot ,true)
+
+// Promise.all([collectClass(allFiles),collectClass(subpackageFiles)]).then((res)=>{
+//   const files = Object.assign({},subpackageFiles,allFiles)
+//   normalizeClass(files,compareClass(flattenAndUnique(Object.assign({},res[0],res[1]))),fileRoot)
+// }).then(()=>{
+//   collectClass(subpackageFiles).then((res)=>{
+//     normalizeSubpackageClass(subpackageFiles, compareSubpackageClass(res))
+//   })
+// })
+
 

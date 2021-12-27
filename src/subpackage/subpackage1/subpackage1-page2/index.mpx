@@ -1,5 +1,5 @@
 <template>
-  <view>这里是subPackage1-page2</view>
+  <view class="subpackage1-color">这里是subPackage1-page2</view>
   <subpackage1-page2-layer1 />
 </template>
 
@@ -10,7 +10,11 @@
     onLoad () {}
   })
 </script>
-
+<style lang="stylus" scoped>
+  .subpackage1-color{
+    color: #ffffff
+  }
+</style>
 <script type="application/json">
   {
     "component": true,
