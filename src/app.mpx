@@ -4,29 +4,10 @@
   /*此处编写全局样式*/
 </style>
 
-<script type="application/json">
-  {
-    "pages": [
-      "./pages/mainpage1/index",
-      "./pages/mainpage2/index"
-    ],
-    "subPackages": [
-      {
-        "root": "subpackage/subpackage1",
-        "pages": [
-          "./subpackage1-page1/index",
-          "./subpackage1-page2/index"
-        ]
-      },
-      {
-        "root": "subpackage/subpackage2",
-        "pages": [
-          "./subpackage2-page1/index",
-          "./subpackage2-page2/index"
-        ]
-      }
-    ]
-  }
+<script name="json">
+  let config = {}
+  config = require('./subpackage')()
+  module.exports = config
 </script>
 
 <!--也可以通过以下形式用js输出json，便于书写注释和使用条件编译-->

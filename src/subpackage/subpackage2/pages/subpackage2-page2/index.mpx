@@ -15,7 +15,7 @@
   {
     "component": true,
     "usingComponents": {
-      "subpackage2-page2-layer1": "../../../components/comp-subpackage2-page2/subpackage2-page2-layer1"
+      "subpackage2-page2-layer1": "../../../../components/comp-subpackage2-page2/subpackage2-page2-layer1"
     }
   }
 </script>

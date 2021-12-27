@@ -1,6 +1,7 @@
 <template>
-  <view class="subpackage1-color">这里是subPackage1-page2</view>
-  <subpackage1-page2-layer1 />
+  <view class="subpackage1-color">这里是subPackage1-page1</view>
+  <subpackage1-page1-layer1 />
+  <comp-cross />
 </template>
 
 <script>
@@ -10,6 +11,7 @@
     onLoad () {}
   })
 </script>
+
 <style lang="stylus" scoped>
   .subpackage1-color{
     color: #ffffff
@@ -19,7 +21,8 @@
   {
     "component": true,
     "usingComponents": {
-      "subpackage1-page2-layer1": "../../../components/comp-subpackage1-page2/subpackage1-page2-layer1"
+      "subpackage1-page1-layer1": "../../../../components/comp-subpackage1-page1/subpackage1-page1-layer1",
+      "comp-cross": "../../../../components/comp-cross/comp-cross-layer1"
     }
   }
 </script>

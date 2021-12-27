@@ -13,10 +13,10 @@
 <script>
   import { createPage } from '@mpxjs/core'
   import mainpage1 from '../mainpage1/index.mpx?resolve'
-  import subPackage1Page1 from '../../subpackage/subpackage1/subpackage1-page1/index.mpx?resolve'
-  import subPackage1Page2 from '../../subpackage/subpackage1/subpackage1-page2/index.mpx?resolve'
-  import subPackage2Page1 from '../../subpackage/subpackage2/subpackage2-page1/index.mpx?resolve'
-  import subPackage2Page2 from '../../subpackage/subpackage2/subpackage2-page2/index.mpx?resolve'
+  import subPackage1Page1 from '../../subpackage/subpackage1/pages/subpackage1-page1/index.mpx?resolve'
+  import subPackage1Page2 from '../../subpackage/subpackage1/pages/subpackage1-page2/index.mpx?resolve'
+  import subPackage2Page1 from '../../subpackage/subpackage2/pages/subpackage2-page1/index.mpx?resolve'
+  import subPackage2Page2 from '../../subpackage/subpackage2/pages/subpackage2-page2/index.mpx?resolve'
 
   createPage({
     onLoad () {},

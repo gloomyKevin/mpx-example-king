@@ -16,8 +16,8 @@
   {
     "component": true,
     "usingComponents": {
-      "subpackage2-page1-layer1": "../../../components/comp-subpackage2-page1/subpackage2-page1-layer1",
-      "comp-cross": "../../../components/comp-cross/comp-cross-layer1"
+      "subpackage2-page1-layer1": "../../../../components/comp-subpackage2-page1/subpackage2-page1-layer1",
+      "comp-cross": "../../../../components/comp-cross/comp-cross-layer1"
     }
   }
 </script>

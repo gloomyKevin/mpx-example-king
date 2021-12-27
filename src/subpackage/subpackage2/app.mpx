@@ -1,0 +1,8 @@
+<script name="json">
+  module.exports = {
+    pages: [
+      './pages/subpackage2-page1/index',
+      './pages/subpackage2-page2/index'
+    ]
+  }
+</script>
