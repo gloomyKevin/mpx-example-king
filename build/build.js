@@ -2,10 +2,11 @@ const rm = require('rimraf')
 const chalk = require('chalk')
 const webpack = require('webpack')
 const program = require('commander')
+const path = require('path')
+const { spawn } = require('child_process')
 const { userConf, supportedModes } = require('../config/index')
 const getWebpackConf = require('./getWebpackConf')
 const { resolveDist, getRootPath } = require('./utils')
-const { outputPath, recursiveScanFiles } = require('../scripts/index')
 
 program
   .option('-w, --watch', 'watch mode')
@@ -45,7 +46,6 @@ if (userConf.openChildProcess && modes.length > 1) {
   if (isProduct && isWatch) scriptType = 'watch:prod'
   if (!isProduct && !isWatch) scriptType = 'build:dev'
 
-  const spawn = require('child_process').spawn
   while (modes.length > 1) {
     const modeObj = modes.pop()
     const modeAndEnv = modeObj.env ? `${modeObj.mode}:${modeObj.env}` : modeObj.mode
@@ -105,6 +105,13 @@ if (program.watch) {
 } else {
   webpack(webpackConfs, callback)
 }
+// tailwind 子进程开启
+function startTailWindBuild () {
+  const workerProcess = spawn('node', [path.resolve(__dirname, '../scripts/index.js')], { stdio: 'inherit' })
+  workerProcess.on('close', code => {
+    process.exitCode = code
+  })
+}
 
 async function callback (err, stats) {
   if (err) {
@@ -137,10 +144,10 @@ async function callback (err, stats) {
   if (stats.hasErrors()) {
     console.log(chalk.red('  Build failed with errors.\n'))
   } else if (program.watch) {
-    // TODO something
-    await recursiveScanFiles(outputPath)
+    startTailWindBuild()
     console.log(chalk.cyan(`  Build complete at ${new Date()}.\n  Still watching...\n`))
   } else {
+    startTailWindBuild()
     console.log(chalk.cyan('  Build complete.\n'))
   }
 }
