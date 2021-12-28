@@ -2,8 +2,7 @@ const rm = require('rimraf')
 const chalk = require('chalk')
 const webpack = require('webpack')
 const program = require('commander')
-const path = require('path')
-const { spawn } = require('child_process')
+const startTailWindBuild = require('../scripts/lib/accessWatch')
 const { userConf, supportedModes } = require('../config/index')
 const getWebpackConf = require('./getWebpackConf')
 const { resolveDist, getRootPath } = require('./utils')
@@ -104,13 +103,6 @@ if (program.watch) {
   webpack(webpackConfs).watch(undefined, callback);
 } else {
   webpack(webpackConfs, callback)
-}
-// tailwind 子进程开启
-function startTailWindBuild () {
-  const workerProcess = spawn('node', [path.resolve(__dirname, '../scripts/lib/processSubpackage.js')], { stdio: 'inherit' })
-  workerProcess.on('close', code => {
-    process.exitCode = code
-  })
 }
 
 async function callback (err, stats) {
