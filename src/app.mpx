@@ -2,7 +2,6 @@
 
 <style>
   /*此处编写全局样式*/
-  @import '../tailwindOutput.wxss';
 </style>
 
 <script type="application/json">
