@@ -1,68 +1,72 @@
 const fg = require('fast-glob');
 const fs = require('fs');
+const fsPromise = require('fs/promises')
 const path = require('path')
 const postcss = require('postcss');
+const shell = require('shelljs')
+const chalk = require('chalk')
 
-const commonStyle = '/commonStyle.css'
+const args = process.argv.splice(2)
 
-const example = ['dist/wx/subpackage/subpackage1/','dist/wx/subpackage/subpackage2/']
+let [commonStyle, fileRoot, cssName, subpackagefileDir, needAllFileClass] = args
 
-const fileRoot = 'dist/wx'
-// console.log('dadasfasf',fg.sync('dist/wx/**', { onlyFiles: false, deep: 1 }))
-const normalizeFiles = (fileDir = [], fileRoot = 'dist/wx', needAllFileClass = false) => {
-  if(needAllFileClass && !fileRoot){
-    console.log('如果是需要提取整个文件的公共样式, 需要写扫描文件入口! 如果不需要可以不传 needAllFileClass 参数')
-    return
-  }
-  let files = []
-  const subpackageFiles = {}
-  const allFiles = {}
-  if(needAllFileClass && !fileDir.length){ //扫描所有文件
-    fileDir = ['**/*.wxss']
-  }else if(needAllFileClass && fileDir.length){ //扫描部分分包和总目录下所有wxss
-    fileDir = fileDir.map((path)=>{
-      return path + '**/*.wxss'
-    })
-    fileDir = fileDir.concat([`${fileRoot}/pages/**/*.wxss`,`${fileRoot}/components/**/*.wxss`])
-  }else if(!needAllFileClass && fileDir.length){ //只需要扫描部分分包 
-    fileDir = fileDir.map((path)=>{
-      return path + '**/*.wxss'
-    })
-  }
-  if(files.includes(`${fileRoot}/app.wxss`)){
-    const appIndex = files.findIndex(`${fileRoot}/app.wxss`)
-    files.split(appIndex,1)
-  }
-  files = fg.sync(fileDir);
-  // console.log('files',files)
-  files.map((file)=>{
-    if(!allFiles[path.resolve(file,'../../')] && 
-      (file.includes(`${fileRoot}/pages`) || file.includes(`${fileRoot}/components`))
-    ){
-      allFiles[path.resolve(file,'../../')] = []
-    }
-
-    if(!subpackageFiles[path.resolve(file,'../../../')] && 
-      (!file.includes(`${fileRoot}/pages`) && !file.includes(`${fileRoot}/components`))
-      ){
-      subpackageFiles[path.resolve(file,'../../../')] = []
-    }
-
-    if(allFiles[path.resolve(file,'../../')] && 
-      (file.includes(`${fileRoot}/pages`) || file.includes(`${fileRoot}/components`))){
-      allFiles[path.resolve(file,'../../')].push(file)
-    }
-    
-    if(subpackageFiles[path.resolve(file,'../../../')] &&
-      (!file.includes(`${fileRoot}/pages`) && !file.includes(`${fileRoot}/components`))
-      ){
-      subpackageFiles[path.resolve(file,'../../../')].push(file)
-    }
+const scanFiles = (mainDirs, subpackageDirs, cssName, fileRoot) => {
+  let mainfiles = {}, subpackagefiles = {}
+  mainDirs.length && mainDirs.forEach(dir=>{
+    if(!mainfiles[`${fileRoot}`]) mainfiles[`${fileRoot}`] =[]
+    mainfiles[`${fileRoot}`] = mainfiles[`${fileRoot}`].concat(fg.sync([`${dir}/**/*.${cssName}`]))
+  })
+  subpackageDirs.length && subpackageDirs.forEach(dir=>{
+    subpackagefiles[dir]=fg.sync([`${dir}/**/*.${cssName}`]);
   })
   return {
-    allFiles,
-    subpackageFiles
+    mainfiles,
+    subpackagefiles
   }
+}
+/**
+ * 返回分包目录以及主包特定目录下的所有样式文件
+ * @param cssName css文件的后缀名
+ * @param subpackagefileDir 需要扫描的几个分包目录
+ * @param fileRoot 入口文件夹名称
+ * @param needAllFileClass 是否需要提取主包和分包的公共样式
+ * @returns {Object} 
+ */
+const normalizeFiles = async ({fileRoot = '', cssName = 'wxss', subpackagefileDir = [], needAllFileClass = false}) => {
+  let files = {}
+  let subPackagesDir = []
+  let mainDir = []
+  let allDir = []
+  
+  if(fileRoot){
+    const data = await fsPromise.readFile(path.resolve(fileRoot, './app.json'), 'utf8')
+    const jsonObject = JSON.parse(data)
+
+    jsonObject.subPackages.forEach(subpackage=>{
+      subPackagesDir.push(fileRoot + '/' +subpackage.root)
+    })
+
+    allDir = fg.sync(`${fileRoot}/**`, { onlyDirectories: true, deep: 1 })
+
+    allDir.forEach(alldir => {
+      if(!subPackagesDir.includes(alldir)){
+        mainDir.push(alldir)
+      }
+    })
+  }
+
+  if(needAllFileClass && !subpackagefileDir.length){ //扫描所有样式文件
+    files = scanFiles(mainDir, subPackagesDir, cssName, fileRoot)
+  }else if(needAllFileClass && subpackagefileDir.length){ //扫描部分分包和总目录下所有样式文件
+    files = scanFiles(mainDir, subpackagefileDir, cssName, fileRoot)
+  }else if(!needAllFileClass && subpackagefileDir.length){ //只需要扫描部分分包 
+    files = scanFiles([], subpackagefileDir, cssName)
+  }else if(!needAllFileClass && !subpackagefileDir.length){ //扫描全部分包不扫描主包
+    files = scanFiles([], subPackagesDir, cssName)
+  }
+  return new Promise((resolve,reject)=>{
+    resolve(files)
+  })
 }
 
 const collectClass = async (Files) => {
@@ -147,13 +151,13 @@ const normalizeSubpackageClass = (subpackageFiles,commonClass) => {
         postcss(postCssNormallize({
           subpackageCommonRoot,
           commonClass:commonClass[subpackage],
-          importClass:path.join(file,'../../../',`${commonStyle}`)
+          importClass:path.join(subpackage,`${commonStyle}`)
         })).process(data).then(function(res){
           fs.writeFile(`${file}`,res.css,()=>{
             if (err) throw err;
             // console.log('The file has been saved!');
           })
-          fs.writeFile(`${subpackage}${commonStyle}`,subpackageCommonRoot.toString(),()=>{
+          fs.writeFile(path.join(subpackage,`${commonStyle}`),subpackageCommonRoot.toString(),()=>{
             if (err) throw err;
             // console.log('The file has been saved!');
           })
@@ -271,7 +275,6 @@ const compareSubpackageClass = (subpackagesArr) => {
       }
     }
   }
-  console.log('compareSubpackageClass',commonClassObj)
   return commonClassObj
 }
 
@@ -291,26 +294,54 @@ const compareClass = (filesArr) => {
       delete commonClassObj[commonClass]
     }
   }
-  console.log('compareClass',commonClassObj)
   return commonClassObj
 }
 
-const flattenAndUnique = (classMap) => {
+const flattenAndUnique = (classMap, fileRoot) => {
   for(let key in classMap){
-    classMap[key] = Array.from(new Set(classMap[key].flat()))
+    if(key === fileRoot){
+      classMap[key] = classMap[key].flat()
+    }else{
+      classMap[key] = Array.from(new Set(classMap[key].flat()))
+    }
   }
   return classMap
 }
 
-const { subpackageFiles, allFiles } = normalizeFiles(example, fileRoot ,true)
+if(needAllFileClass && !fileRoot){
+  shell.echo(chalk.red('如果是需要提取整个文件的公共样式, 需要写扫描文件入口! 如果不需要可以不传 needAllFileClass 参数'))
+  shell.exit(1)
+}
 
-// Promise.all([collectClass(allFiles),collectClass(subpackageFiles)]).then((res)=>{
-//   const files = Object.assign({},subpackageFiles,allFiles)
-//   normalizeClass(files,compareClass(flattenAndUnique(Object.assign({},res[0],res[1]))),fileRoot)
-// }).then(()=>{
-//   collectClass(subpackageFiles).then((res)=>{
-//     normalizeSubpackageClass(subpackageFiles, compareSubpackageClass(res))
-//   })
-// })
+if(subpackagefileDir && !subpackagefileDir.length && !fileRoot){
+  shell.echo(chalk.red('如果是需要提取所有分包的公共样式, 需要写扫描文件入口! 如果提取部分分包的公共样式需要添加 subpackagefileDir 参数'))
+  shell.exit(1)
+}
+
+if(!cssName){
+  cssName = 'wxss'
+  shell.echo(chalk.yellow('如果没有传css文件后缀默认文件后缀为wxss'))
+}
+
+if(!commonStyle){
+  commonStyle = `./commonStyle.${cssName}`
+  shell.echo(chalk.yellow('如果没有设定公共样式文件名称，默认为名为commonStyle'))
+}
+
+needAllFileClass = needAllFileClass === 'false' ? false : needAllFileClass
+
+normalizeFiles({fileRoot, cssName, subpackagefileDir, needAllFileClass}).then(res=>{
+  const {mainfiles, subpackagefiles} = res
+  Promise.all([collectClass(mainfiles),collectClass(subpackagefiles)]).then((res)=>{
+    const files = Object.assign({},subpackagefiles,mainfiles)
+    needAllFileClass && normalizeClass(files,compareClass(flattenAndUnique(Object.assign({},res[0],res[1]), fileRoot)),fileRoot)
+  }).then(()=>{
+    collectClass(subpackagefiles).then((res)=>{
+      normalizeSubpackageClass(subpackagefiles, compareSubpackageClass(res))
+    })
+  })
+})
+
+
 
 
