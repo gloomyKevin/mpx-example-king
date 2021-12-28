@@ -67,7 +67,7 @@
     "http-server": "^0.12.0",
     "jest": "^24.9.0",
     "miniprogram-simulate": "^1.1.6",
-    "mpx-tailwindcss-preset": "^2.1.1",
+    "mpx-tailwindcss-preset": "^2.1.5",
     "npm-run-all": "^4.1.5",
     "path": "^0.12.7",
     "postcss": "^8.4.5",

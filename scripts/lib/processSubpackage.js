@@ -1,17 +1,40 @@
 const fs = require('fs/promises')
 const { constants } = require('fs')
 const path = require('path')
+// const program = require('commander')
 const shell = require('shelljs')
 const chalk = require('chalk')
+const { createContent } = require('../tailwind.config')
 
-// 样式隔离 styleIsolation 开启样式隔离
-const SWITCH_STYLE_ISOLATION = 'apply-shared'
+const cfgPath = '../../dist/wx'
 
-// 日志输出带颜色
-const log = (...args) => console.log(chalk.cyan(...args))
+// 基本配置
+const TailwindBaseConfig = {
+  // 样式隔离 styleIsolation 开启样式隔离
+  SWITCH_STYLE_ISOLATION: 'apply-shared',
+  // 全局分包 map 映射
+  subPackageMap: new Map(),
+  // 默认输出 dist 路径
+  outputPath: path.resolve(__dirname, cfgPath)
+}
 
-// 默认输出 dist 路径
-const outputPath = path.resolve(__dirname, '../dist/wx')
+/**
+ * 日志输出
+ * @class
+ */
+class Logger {
+  static info (...args) {
+    shell.echo(chalk.cyan(...args))
+  }
+
+  static error (...args) {
+    shell.echo(chalk.red(...args))
+  }
+
+  static warning (...args) {
+    shell.echo(chalk.yellow(...args))
+  }
+}
 
 /**
  * 判断文件是否存在
@@ -29,23 +52,26 @@ const fileIsExist = async fileName => {
   return flag
 }
 
+const setPresetCfgContent = (subpackageRoot) => {
+  // TODO 根路径暂时先写死，后续统一改
+  return `../dist/wx/${subpackageRoot}/**/*.wxml`
+}
+
 /**
- * 获取分包配置信息
- * @returns {Promise<Map>}
+ * 设置分包配置信息
+ * @returns {Promise<void>}
  */
-const getSubpackageMap = async () => {
+const setSubpackageMap = async () => {
   try {
-    const subPackageMap = new Map()
-    const data = await fs.readFile(path.resolve(outputPath, './app.json'), 'utf8')
+    const data = await fs.readFile(path.resolve(TailwindBaseConfig.outputPath, './app.json'), 'utf8')
     const jsonObject = JSON.parse(data)
     const subPackages = jsonObject.subPackages
     for (let i = 0, len = subPackages.length; i < len; i++) {
       let item = subPackages[i]
       let root = item.root
-      const resolveSubPackagePath = path.resolve(outputPath, root)
-      subPackageMap.set(resolveSubPackagePath, true)
+      const resolveSubPackagePath = path.resolve(TailwindBaseConfig.outputPath, root)
+      TailwindBaseConfig.subPackageMap.set(resolveSubPackagePath, item)
     }
-    return subPackageMap
   } catch (err) {
     throw err
   }
@@ -57,7 +83,7 @@ const getSubpackageMap = async () => {
  * @param {string} styleIsolation 默认值为 apply-shared
  * @returns {Promise<void>}
  */
-const configStyleIsolation = async (componentsFiles, styleIsolation = SWITCH_STYLE_ISOLATION) => {
+const configStyleIsolation = async (componentsFiles, styleIsolation = TailwindBaseConfig.SWITCH_STYLE_ISOLATION) => {
   try {
     const folderFiles = await fs.readdir(componentsFiles)
     for (let i = 0, len = folderFiles.length; i < len; i++) {
@@ -87,7 +113,8 @@ const configStyleIsolation = async (componentsFiles, styleIsolation = SWITCH_STY
  * @returns {Promise<void>}
  */
 const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath) => {
-  // TODO 相关分包下文件自动 import 分包构建出来的 wxss 样式，若对应分包文件下的 wxss 文件不存在，则自动创建
+  // 自动注入内容
+  const autoImportStr = `@import "${path.relative(subPackageAbsPath, subPackageImportPath)}"; \n`
   const subPackageFiles = await fs.readdir(subPackageAbsPath)
   for (let i = 0, len = subPackageFiles.length; i < len; i++) {
     const subPackageFile = subPackageFiles[i]
@@ -99,7 +126,6 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
     } else if (path.extname(subAbsFilePath) === '.wxml') {
       // 页面级别自动 import 分包输出样式文件
       const subAbsStylePath = path.resolve(path.dirname(subAbsFilePath), path.basename(subAbsFilePath, path.extname(subAbsFilePath)) + '.wxss')
-      const autoImportStr = `@import "${subPackageImportPath}"; \n`
       const exist = await fileIsExist(subAbsStylePath)
       if (exist) {
         let data = await fs.readFile(subAbsStylePath, 'utf-8')
@@ -134,15 +160,27 @@ const recursiveScanFiles = async currentPath => {
       const currentAbsPath = path.resolve(currentPath, currentFile)
       const currentAbsStat = await fs.stat(currentAbsPath)
       const isDirectory = currentAbsStat.isDirectory()
-      // 获取分包映射 map
-      const subPackageMap = await getSubpackageMap()
-      if (subPackageMap.get(currentAbsPath)) {
+      // 设置分包映射 map
+      await setSubpackageMap()
+      if (TailwindBaseConfig.subPackageMap.has(currentAbsPath)) {
         // 分包路径下创建相关页面
-        const fromPath = path.resolve(__dirname, '../tailwind.css')
+        const fromPath = path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
         const configPath = path.resolve(__dirname, '../tailwind.config.js')
         // 输出 index.wxss 到分包 root
         const outPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
-        shell.exec(`npx tailwindcss build ${fromPath} -c ${configPath} -o ${outPath}`)
+        if (!shell.which('npx')) {
+          Logger.error('sorry, this script requires npx, please update npm version!')
+          shell.exit(1)
+        }
+        // only for test
+        let res = setPresetCfgContent(TailwindBaseConfig.subPackageMap.get(currentAbsPath).root)
+        createContent(res)
+        // program
+        //   .usage('tailwind')
+        //   .option('-w, --watch', '开启 tailwind 监听')
+        //   .parse(process.argv)
+        // program.args()
+        shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
         // 自动导入分包样式
         await autoImportSubPackageStyle(currentAbsPath, outPath)
       } else if (isDirectory) {
@@ -155,7 +193,15 @@ const recursiveScanFiles = async currentPath => {
   }
 }
 
-module.exports = {
-  outputPath,
-  recursiveScanFiles
+/**
+ * 初始化方法
+ */
+async function init () {
+  Logger.warning('==========tailwind compile start==========')
+  console.time('tailwind build time')
+  await recursiveScanFiles(TailwindBaseConfig.outputPath)
+  Logger.warning('==========tailwind compile end==========')
+  console.timeEnd('tailwind build time')
 }
+
+init()

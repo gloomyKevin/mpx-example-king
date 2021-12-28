@@ -107,7 +107,7 @@ if (program.watch) {
 }
 // tailwind 子进程开启
 function startTailWindBuild () {
-  const workerProcess = spawn('node', [path.resolve(__dirname, '../scripts/index.js')], { stdio: 'inherit' })
+  const workerProcess = spawn('node', [path.resolve(__dirname, '../scripts/lib/processSubpackage.js')], { stdio: 'inherit' })
   workerProcess.on('close', code => {
     process.exitCode = code
   })
