@@ -1,17 +1,20 @@
 # miniprogram-tailwind-windi-kit
 
-> 一套完整的 **原生小程序** 接入/重构 到 **tailwind/windicss** 的方案, 支持**分包**及**高度自定义配置**
+> 一套完整的**原生小程序**接入/重构到**tailwind/windicss**的方案, 支持**分包**及**高度自定义配置**
 
 ## 开始体验
+### 1. 接入watch
+需要在项目的构建完成之后调用 accessWatch 暴露出来的方法
 ```bash
 npm i
-# 通过demo体验
-cd example
+
 # watch project
 npm run watch
 ```
+### 2. 执行脚手架(TODO)
 
-## 描述
+
+## 介绍
 因为基于原生小程序，所以同样适用任何小程序框架最终生成的原生代码（后处理）
 - [ ] 可以选择切换tailwind模式或windicss模式
 - [ ] 小程序分包处理 + 公共样式提取（可配置场景：用户可以选择是否使用在分包场景；可配置样式表生成方案，例如主包一份/分包各自一份/独立分包一份/指定分包输出）
@@ -25,6 +28,49 @@ npm run watch
 - 基于 tailwind cli 和 windicss cli 上层封装，与 tailwind 和 windicss 源码解耦，所以能够同步升级最新版本
 - 高度自定义（例如：将特性都做成用户可配置，例如样式库选择，分包输出策略，去重策略）
 - 提供重构工具，快速改造项目
+
+## 配置
+```js
+/* 自定义配置 */
+module.exports = {
+  // 小程序文件目录
+  miniprogramPath: './dist/wx',
+  // 'tailwindcss' 'windicss'
+  classMode: 'tailwindcss',
+  // 样式生成策略
+  cssMode: {
+    mainPackage: true,
+    subPackage: true,
+    specSubPackage: []
+  }
+}
+```
+
+### cssMode
+<!-- <table align="center">
+  <thead>
+   <th>包名</th>
+   <th>别</th>
+   <th>年龄</th>
+  </thead>
+  <tbody>
+   <tr>
+    <td>易建联</td>
+    <td>男</td>
+    <td>35</td>
+   </tr>
+   <tr>
+    <td colspan="3"></td>
+   </tr>
+  </tbody>
+ </table> -->
+| mainPackage主包 | subPackage分包 | specSubPackage指定分包 | 输出到 |
+| ---- | ---- | ---- | ---- |
+| true | false | [ ] | 主包 |
+| true | true | [ ] | 主包+全部分包 |
+| true | true | ['subPackageName'] | 主包+指定分包 |
+| false | true | [ ] | 分包 |
+| false | true | ['subPackageName'] | 指定分包 |
 
 ## 目录
 ```
@@ -46,7 +92,6 @@ npm run watch
 ├── index.ts          // config.js 处理 & cli配置
 └── example           // demo(自带分包+测试类)
 ```
+
 ## TODO
 - [ ] 增强调试性
-
-## 用户配置

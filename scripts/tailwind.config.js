@@ -12,6 +12,6 @@ module.exports = {
     })
   ],
   // content: [subpackageContent],
-  content: ['./dist/wx/subpackage1/**/*.wxml'],
+  content: ['./dist/wx/subpackage2/**/*.wxml'],
   createContent
 }
