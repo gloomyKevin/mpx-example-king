@@ -17,7 +17,8 @@
     "test": "jest",
     "build:test": "npm run build && jest",
     "build:dll": "node ./build/buildDll.js",
-    "help": "node ./build/build.js --help"
+    "help": "node ./build/build.js --help",
+    "commonClass": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss'"
   },
   "author": "gloomyKevin",
   "license": "ISC",
@@ -25,6 +26,7 @@
     "@mpxjs/api-proxy": "^2.5.10",
     "@mpxjs/core": "^2.6.31",
     "cosmiconfig": "^7.0.1",
+    "mp-common-class": "^1.0.0-beta9",
     "shelljs": "^0.8.4",
     "vue": "^2.6.10",
     "vue-i18n": "^8.15.3"
