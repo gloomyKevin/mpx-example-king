@@ -5,6 +5,7 @@ const path = require('path')
 const shell = require('shelljs')
 const chalk = require('chalk')
 const { createContent } = require('../tailwind.config')
+// const execCli = require('./cliExpand')
 
 const cfgPath = '../../dist/wx'
 
@@ -16,6 +17,19 @@ const TailwindBaseConfig = {
   subPackageMap: new Map(),
   // 默认输出 dist 路径
   outputPath: path.resolve(__dirname, cfgPath)
+}
+
+const customConfig = {
+  // 小程序文件目录
+  miniprogramPath: './dist/wx',
+  classMode: 'tailwindcss',
+  cssMode: {
+    mainPackage: true,
+    subPackage: true,
+    specSubPackage: []
+  },
+  configPath: '',
+  outputPath: ''
 }
 
 /**
@@ -146,6 +160,34 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
   }
 }
 
+function execCli (customConfig, args, outputPath) {
+  const { classMode, configPath } = customConfig
+  if (classMode === 'tailwindcss') {
+    injectTailwindcss()
+  } else if (cssMode === 'windicss') {
+    // injectWindicss()
+  } else {
+    console.error('input illegal')
+  }
+
+  // 不对外暴露自定义
+  function _setInputPath () {
+    return path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
+  }
+
+  function setConfigPath () {
+    return path.resolve(__dirname, '../tailwind.config.js')
+  }
+
+  function injectTailwindcss () {
+    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath}`)
+  }
+
+  // function injectWindicss () {
+  //   shell.exec(`windicss '${inputPath}' -f ${configPath} -o ${outPath} ${normalizeInjectArgvs()}`)
+  // }
+}
+
 /**
  * 文件扫描方法
  * @param currentPath 当前扫描路径
@@ -164,10 +206,13 @@ const recursiveScanFiles = async currentPath => {
       await setSubpackageMap()
       if (TailwindBaseConfig.subPackageMap.has(currentAbsPath)) {
         // 分包路径下创建相关页面
-        const fromPath = path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
-        const configPath = path.resolve(__dirname, '../tailwind.config.js')
+        // const fromPath = path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
+        // const windiFromPath = path.resolve(__dirname, '../presets/windiPreset/windicss.css')
+        // const configPath = path.resolve(__dirname, '../tailwind.config.js')
         // 输出 index.wxss 到分包 root
-        const outPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
+        // TODO 增加cssMode判断，改变扫描执行策略及outputPath生成策略
+        const outputPath = path.resolve(currentPath, currentAbsPath, './index.wxss')
+        // TODO 不支持npx时直接执行文件
         if (!shell.which('npx')) {
           Logger.error('sorry, this script requires npx, please update npm version!')
           shell.exit(1)
@@ -180,9 +225,11 @@ const recursiveScanFiles = async currentPath => {
         //   .option('-w, --watch', '开启 tailwind 监听')
         //   .parse(process.argv)
         // program.args()
-        shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
+        execCli(customConfig, undefined, outputPath)
+        // shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
+        // shell.exec(`windicss '${windiFromPath}' -c ${configPath} -o ${outPath}`)
         // 自动导入分包样式
-        await autoImportSubPackageStyle(currentAbsPath, outPath)
+        await autoImportSubPackageStyle(currentAbsPath, outputPath)
       } else if (isDirectory) {
         // 深度扫描
         await recursiveScanFiles(currentAbsPath)

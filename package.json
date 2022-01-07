@@ -25,7 +25,6 @@
   "dependencies": {
     "@mpxjs/api-proxy": "^2.5.10",
     "@mpxjs/core": "^2.6.31",
-    "cosmiconfig": "^7.0.1",
     "mp-common-class": "^1.0.0-beta9",
     "shelljs": "^0.8.4",
     "vue": "^2.6.10",
@@ -50,6 +49,7 @@
     "chalk": "^2.4.2",
     "commander": "^6.0.0",
     "copy-webpack-plugin": "^5.0.3",
+    "cosmiconfig": "^7.0.1",
     "css-loader": "^0.28.11",
     "eslint": "^6.0.0",
     "eslint-config-babel": "^8.0.2",
