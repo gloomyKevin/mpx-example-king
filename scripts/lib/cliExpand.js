@@ -12,31 +12,16 @@
 
 const shell = require('shelljs')
 const path = require('path')
-// const searchConfig = require('./resolveConfig')
-const customConfig = {
-  // 小程序文件目录
-  miniprogramPath: './dist/wx',
-  classMode: 'tailwindcss',
-  cssMode: {
-    mainPackage: true,
-    subPackage: true,
-    specSubPackage: []
-  },
-  configPath: '',
-  outputPath: ''
-}
 
 // 参数三个来源
 // config配置文件
 // cli 传入参数
 // 动态生成的当前扫描目录，即css文件生成的位置
 module.exports = function execCli (customConfig, args, outputPath) {
-
-  const { cssMode, configPath } = customConfig
-
-  if (cssMode === 'tailwindcss') {
+  const { classMode } = customConfig
+  if (classMode === 'tailwindcss') {
     injectTailwindcss()
-  } else if (cssMode === 'windicss') {
+  } else if (classMode === 'windicss') {
     // injectWindicss()
   } else {
     console.error('input illegal')
@@ -48,27 +33,21 @@ module.exports = function execCli (customConfig, args, outputPath) {
   }
 
   function setConfigPath () {
+    // 给config为默认
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
-  // 剔除通用配置项
-  // function normalizeInjectArgvs (args) {
-  //   // 合并config
-  //   // 剔除通用配置项
-  //   exclusiveArgs()
-  //   restArgs.join(' ')
-  // }
+  // 过滤cli中的input，output
+  function filtArgs (arr) {
+    return arr
+  }
 
   function injectTailwindcss () {
-    // shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} --[${restArgs}]`)
-    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath}`)
+    const restArgsStr = filtArgs([...process.argv]).join(' ')
+    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} ${restArgsStr}`)
   }
 
   // function injectWindicss () {
   //   shell.exec(`windicss '${inputPath}' -f ${configPath} -o ${outPath} ${normalizeInjectArgvs()}`)
   // }
 }
-
-// module.exports = function normalizeCliArgs (args) {
-//   // arrToObj(args)
-// }
