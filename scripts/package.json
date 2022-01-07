@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "mini": "index.js"
+    "mini": "lib/processSubpackage.js"
   },
   "directories": {
     "example": "example",

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const fs = require('fs/promises')
 const { constants } = require('fs')
 const path = require('path')
@@ -164,7 +165,7 @@ function execCli (customConfig, args, outputPath) {
   const { classMode, configPath } = customConfig
   if (classMode === 'tailwindcss') {
     injectTailwindcss()
-  } else if (cssMode === 'windicss') {
+  } else if (classMode === 'windicss') {
     // injectWindicss()
   } else {
     console.error('input illegal')
@@ -179,8 +180,14 @@ function execCli (customConfig, args, outputPath) {
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
+  // 过滤cli中的input，output
+  function filtArgs (arr) {
+    return arr
+  }
+
   function injectTailwindcss () {
-    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath}`)
+    const restArgsStr = filtArgs([...process.argv]).join(' ')
+    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} ${restArgsStr}`)
   }
 
   // function injectWindicss () {
@@ -225,7 +232,7 @@ const recursiveScanFiles = async currentPath => {
         //   .option('-w, --watch', '开启 tailwind 监听')
         //   .parse(process.argv)
         // program.args()
-        execCli(customConfig, undefined, outputPath)
+        execCli(customConfig, outputPath)
         // shell.exec(`npx tailwindcss -c ${configPath} -i ${fromPath} -o ${outPath}`)
         // shell.exec(`windicss '${windiFromPath}' -c ${configPath} -o ${outPath}`)
         // 自动导入分包样式
