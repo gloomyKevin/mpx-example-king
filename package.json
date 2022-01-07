@@ -89,5 +89,17 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.12",
     "webpack-merge": "^4.1.2"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gloomyKevin/mpx-example-king.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/gloomyKevin/mpx-example-king/issues"
+  },
+  "homepage": "https://github.com/gloomyKevin/mpx-example-king#readme"
 }
