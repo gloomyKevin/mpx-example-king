@@ -5,17 +5,30 @@ const path = require('path')
 const execCli = require('./lib/cliExpand')
 const { Logger } = require('./lib/util/index')
 const autoImportSubPackageStyle = require('./lib/processSubpackage')
+const getMergedConfig = require('./lib/resolveConfig')
 
 // 读取config并挂载到全局
 // resolveConfig()
 // 读取arg，并解析为config对象形式
 // arg对象，全局config，默认config三者合并
+const getFinalConfig = async () => {
+  const mergedConfig = await getMergedConfig()
+  console.log('%c [ mergedConfig ]-16', 'font-size:13px; background:pink; color:#bf2c9f;', mergedConfig)
+  // const { specificArgsObj } = getSpecificArgsObj()
+  // const finalConfig = Object.assign(mergedConfig, specificArgsObj)
+  // return finalConfig
+}
 
-// 最终配置
+// function mountFinalCfgToGlobal () {
+//   global.getFinalConfig()
+// }
+// mountFinalCfgToGlobal()
+
+// finalConfig 示例
 const finalConfig = {
   // 样式隔离 styleIsolation 开启样式隔离
   SWITCH_STYLE_ISOLATION: 'apply-shared',
-  // 全局分包 map 映射
+  // map 存储 app.json 中的分包
   subPackageMap: new Map(),
   // 小程序所在目录
   // 小程序文件目录,此处以scripts作为相对，有问题，待修改
@@ -61,6 +74,7 @@ const setSubpackageMap = async () => {
  * @param currentPath 当前扫描路径
  * @returns {Promise<void>}
  */
+// TODO 使用fast-glob或者node-glob加速扫描
 const recursiveScanFiles = async currentPath => {
   try {
     const currentFiles = await fs.readdir(currentPath)
