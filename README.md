@@ -3,7 +3,20 @@
 > 一套完整的**原生小程序**接入/重构到**tailwind/windicss**的方案, 支持**分包**及**高度自定义配置**
 
 ## 开始体验
-### 1. 接入watch
+
+### 1. 脚手架
+```bash
+// cssMode 配置为 tailwindcss
+// 完全遵循tailwind cli，config中指定必填xxx后，直接执行mini即可
+/// 优先级为mini cli参数 > 自定义 config 配置 > 默认 config 配置
+mini
+mini -c configPath -i inputPath -o outPath ...other arguments
+
+// cssMode 配置为 windicss
+mini
+
+```
+### 2. 接入watch
 需要在项目的构建完成之后调用 accessWatch 暴露出来的方法
 ```bash
 npm i
@@ -11,7 +24,6 @@ npm i
 # watch project
 npm run watch
 ```
-### 2. 执行脚手架(TODO)
 
 
 ## 介绍
