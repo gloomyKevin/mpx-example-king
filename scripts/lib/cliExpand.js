@@ -6,9 +6,10 @@
 
 const shell = require('shelljs')
 const path = require('path')
+const { Logger } = require('./lib/util/index')
 const { globalFinalConfig } = global
 
-module.exports = function execCli (args, outputPath) {
+module.exports = function execCli (execCliPath, cliArgs) {
   const { classMode } = globalFinalConfig
   if (classMode === 'tailwindcss') {
     injectTailwindcss()
@@ -23,13 +24,22 @@ module.exports = function execCli (args, outputPath) {
     return path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
   }
 
+  function _setOutputPath () {
+    return path.resolve(execCliPath, './index.wxss')
+  }
+
   function setConfigPath () {
-    // 给config为默认
+    // TODO 修改为globalFinalConfig的configPath
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
   function injectTailwindcss () {
-    shell.exec(`npx tailwindcss build -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} ${args}`)
+    // TODO 改为 不支持npx时直接执行文件
+    if (!shell.which('npx')) {
+      Logger.error('sorry, this script requires npx, please update npm version!')
+      shell.exit(1)
+    }
+    shell.exec(`npx tailwindcss build -c ${setConfigPath()} -i ${_setInputPath()} -o ${_setOutputPath()} ${cliArgs}`)
   }
 
   // function injectWindicss () {

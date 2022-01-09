@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 const fs = require('fs/promises')
-const shell = require('shelljs')
+// const shell = require('shelljs')
 const path = require('path')
 const execCli = require('./lib/cliExpand')
 const { Logger } = require('./lib/util/index')
-const autoImportSubPackageStyle = require('./lib/processSubpackage')
+// const autoImportSubPackageStyle = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
+const scanTaskQueue = require('./lib/scanStrategy')
 
 const globalConstants = {
   // 样式隔离 styleIsolation 开启样式隔离
@@ -30,6 +31,27 @@ const mountFinalCfgToGlobal = async () => {
 }
 mountFinalCfgToGlobal()
 
+const { globalFinalConfig: { miniprogramPath } } = global
+const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
+
+// 通过app.json构建map并挂载到全局
+const setSubpackageMap = async () => {
+  try {
+    const data = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
+    const jsonObject = JSON.parse(data)
+    const subPackages = jsonObject.subPackages
+    for (let i = 0, len = subPackages.length; i < len; i++) {
+      let item = subPackages[i]
+      let root = item.root
+      const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
+      global.globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
+    }
+  } catch (err) {
+    throw err
+  }
+}
+setSubpackageMap()
+
 // globalFinalConfig 示例
 // const globalFinalConfig = {
 //   // 样式隔离 styleIsolation 开启样式隔离
@@ -50,25 +72,6 @@ mountFinalCfgToGlobal()
 //   // 以下为可选，合并策略待定
 //   configPath: ''
 // }
-const { globalFinalConfig } = global
-// const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
-
-// 通过app.json构建map并挂载到全局
-const setSubpackageMap = async () => {
-  try {
-    const data = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
-    const jsonObject = JSON.parse(data)
-    const subPackages = jsonObject.subPackages
-    for (let i = 0, len = subPackages.length; i < len; i++) {
-      let item = subPackages[i]
-      let root = item.root
-      const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
-      globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
-    }
-  } catch (err) {
-    throw err
-  }
-}
 
 // // classMode策略
 // // 输出当前策略提示
@@ -119,12 +122,19 @@ const setSubpackageMap = async () => {
 //   }
 // }
 
-// async function init () {
-//   Logger.warning('==========tailwind compile start==========')
-//   console.time('tailwind build time')
-//   await recursiveScanFiles(miniprogramAbsPath)
-//   Logger.warning('==========tailwind compile end==========')
-//   console.timeEnd('tailwind build time')
-// }
+// refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
+function execCliByCssMode () {
+  scanTaskQueue.forEach((toBeScannedPath) => {
+    execCli(toBeScannedPath, args)
+  })
+}
 
-// init()
+async function init () {
+  Logger.warning('==========tailwind compile start==========')
+  console.time('tailwind build time')
+  await execCliByCssMode()
+  Logger.warning('==========tailwind compile end==========')
+  console.timeEnd('tailwind build time')
+}
+
+init()
