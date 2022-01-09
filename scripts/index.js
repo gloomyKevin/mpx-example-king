@@ -6,7 +6,14 @@
 // const { Logger } = require('./lib/util/index')
 // const autoImportSubPackageStyle = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
-const { specificArgsObj, restArgs } = require('./lib/resolveCliArgs')
+const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
+
+const globalConstants = {
+  // 样式隔离 styleIsolation 开启样式隔离
+  SWITCH_STYLE_ISOLATION: 'apply-shared',
+  // map 存储 app.json 中的分包
+  subPackageMap: new Map()
+}
 
 // 读取config并挂载到全局
 // resolveConfig()
@@ -14,19 +21,20 @@ const { specificArgsObj, restArgs } = require('./lib/resolveCliArgs')
 // arg对象，全局config，默认config三者合并
 const getFinalConfig = async () => {
   const mergedConfig = await getMergedConfig()
-  console.log('%c [ mergedConfig ]-16', 'font-size:13px; background:pink; color:#bf2c9f;', mergedConfig)
-  // const { specificArgsObj } = getSpecificArgsObj()
-  const finalConfig = Object.assign(mergedConfig, specificArgsObj)
+  const { specificArgsObj, restArgs } = getSpecificArgsObj(parseCliArgs())
+  const finalConfig = Object.assign(globalConstants, mergedConfig, specificArgsObj)
+  console.log('finalConfig: ', finalConfig)
   return finalConfig
 }
-getFinalConfig()
-// // function mountFinalCfgToGlobal () {
-// //   global.getFinalConfig()
-// // }
-// // mountFinalCfgToGlobal()
 
-// // finalConfig 示例
-// const finalConfig = {
+const mountFinalCfgToGlobal = async () => {
+  // const globalCfg = getFinalConfig()
+  global.globalFinalCfg = await getFinalConfig()
+}
+mountFinalCfgToGlobal()
+
+// globalFinalConfig 示例
+// const globalFinalConfig = {
 //   // 样式隔离 styleIsolation 开启样式隔离
 //   SWITCH_STYLE_ISOLATION: 'apply-shared',
 //   // map 存储 app.json 中的分包
@@ -45,7 +53,7 @@ getFinalConfig()
 //   // 以下为可选，合并策略待定
 //   configPath: ''
 // }
-// const miniprogramAbsPath = path.resolve(__dirname, finalConfig.miniprogramPath)
+// const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
 
 // // 通过app.json构建map并挂载到全局
 // const setSubpackageMap = async () => {
@@ -57,7 +65,7 @@ getFinalConfig()
 //       let item = subPackages[i]
 //       let root = item.root
 //       const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
-//       finalConfig.subPackageMap.set(resolveSubPackagePath, item)
+//       globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
 //     }
 //   } catch (err) {
 //     throw err
@@ -87,7 +95,7 @@ getFinalConfig()
 //       const isDirectory = currentAbsStat.isDirectory()
 //       // 设置分包映射 map
 //       await setSubpackageMap()
-//       if (finalConfig.subPackageMap.has(currentAbsPath)) {
+//       if (globalFinalConfig.subPackageMap.has(currentAbsPath)) {
 //         // 分包路径下创建相关页面
 //         // 输出 index.wxss 到分包 root
 //         // TODO 增加cssMode判断，改变扫描执行策略及outputPath生成策略
@@ -98,9 +106,9 @@ getFinalConfig()
 //           shell.exit(1)
 //         }
 //         // only for test
-//         // let res = setPresetCfgContent(finalConfig.subPackageMap.get(currentAbsPath).root)
+//         // let res = setPresetCfgContent(globalFinalConfig.subPackageMap.get(currentAbsPath).root)
 //         // createContent(res)
-//         execCli(finalConfig, outputPath)
+//         execCli(globalFinalConfig, outputPath)
 //         // 自动导入分包样式
 //         await autoImportSubPackageStyle(currentAbsPath, outputPath)
 //       } else if (isDirectory) {

@@ -45,10 +45,10 @@ let specificCommands = {
   }
 }
 
-let specificArgsObj = {}
-let restArgs = []
 function getSpecificArgsObj (tailwindArgsObj) {
   let specificArgs = []
+  let specificArgsObj = {}
+  let restArgs = []
   Object.entries(tailwindArgsObj).map((cur) => {
     if (tailwindToBeExtractedOptions.indexOf(cur[0]) > -1) {
       specificArgs.push(cur)
@@ -153,9 +153,8 @@ const parseCliArgs = (() => {
     // throw err
   }
 })
-getSpecificArgsObj(parseCliArgs())
 
 module.exports = {
-  specificArgsObj,
-  restArgs
+  getSpecificArgsObj,
+  parseCliArgs
 }
