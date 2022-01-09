@@ -15,9 +15,10 @@ const globalConstants = {
   subPackageMap: new Map()
 }
 
+let args
 const getFinalConfig = async () => {
   const mergedConfig = await getMergedConfig()
-  const { specificArgsObj, restArgs } = getSpecificArgsObj(parseCliArgs())
+  const { specificArgsObj, restArgs: args } = getSpecificArgsObj(parseCliArgs())
   const finalConfig = Object.assign(globalConstants, mergedConfig, specificArgsObj)
   console.log('finalConfig: ', finalConfig)
   return finalConfig
@@ -50,7 +51,7 @@ mountFinalCfgToGlobal()
 //   configPath: ''
 // }
 const { globalFinalConfig } = global
-const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
+// const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
 
 // 通过app.json构建map并挂载到全局
 const setSubpackageMap = async () => {
@@ -105,7 +106,7 @@ const setSubpackageMap = async () => {
 //         // only for test
 //         // let res = setPresetCfgContent(globalFinalConfig.subPackageMap.get(currentAbsPath).root)
 //         // createContent(res)
-//         execCli(globalFinalConfig, outputPath)
+//         execCli(args, outputPath)
 //         // 自动导入分包样式
 //         await autoImportSubPackageStyle(currentAbsPath, outputPath)
 //       } else if (isDirectory) {

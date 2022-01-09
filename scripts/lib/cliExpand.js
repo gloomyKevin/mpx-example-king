@@ -1,9 +1,3 @@
-// 不做重写，将输入的cli指令直接透传到tailwind或者windi
-
-// 按照策略合并后的 argvs & 自定义config
-
-// 根据classMode判断
-
 // 注入到对应cli，config中的公共部分做额外处理
 // input：tailwind中为参数，windi中为数组
 // output：tailwind中为参数，windi中可以通过Seperate分别输出
@@ -12,13 +6,10 @@
 
 const shell = require('shelljs')
 const path = require('path')
+const { globalFinalConfig } = global
 
-// 参数三个来源
-// config配置文件
-// cli 传入参数
-// 动态生成的当前扫描目录，即css文件生成的位置
-module.exports = function execCli (customConfig, args, outputPath) {
-  const { classMode } = customConfig
+module.exports = function execCli (args, outputPath) {
+  const { classMode } = globalFinalConfig
   if (classMode === 'tailwindcss') {
     injectTailwindcss()
   } else if (classMode === 'windicss') {
@@ -37,14 +28,8 @@ module.exports = function execCli (customConfig, args, outputPath) {
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
-  // 过滤cli中的input，output
-  function filtArgs (arr) {
-    return arr
-  }
-
   function injectTailwindcss () {
-    const restArgsStr = filtArgs([...process.argv]).join(' ')
-    shell.exec(`npx tailwindcss -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} ${restArgsStr}`)
+    shell.exec(`npx tailwindcss build -c ${setConfigPath()} -i ${_setInputPath()} -o ${outputPath} ${args}`)
   }
 
   // function injectWindicss () {

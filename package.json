@@ -18,13 +18,15 @@
     "build:test": "npm run build && jest",
     "build:dll": "node ./build/buildDll.js",
     "help": "node ./build/build.js --help",
-    "commonClass": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss'"
+    "commonClass": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss'",
+    "tail:cli": "npx tailwindcss build -i ./scripts/presets/tailwindPreset/tailwind.css -c ./scripts/tailwind.config.js -o ./tailwindOutput.wxss"
   },
   "author": "gloomyKevin",
   "license": "ISC",
   "dependencies": {
     "@mpxjs/api-proxy": "^2.5.10",
     "@mpxjs/core": "^2.6.31",
+    "arg": "^5.0.1",
     "mp-common-class": "^1.0.0-beta9",
     "shelljs": "^0.8.4",
     "vue": "^2.6.10",
