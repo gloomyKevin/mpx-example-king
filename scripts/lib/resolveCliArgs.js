@@ -48,13 +48,18 @@ let specificCommands = {
 function getSpecificArgsObj (tailwindArgsObj) {
   let specificArgs = []
   let specificArgsObj = {}
-  let restArgs = []
+  let restArgs = [...process.argv.splice(2)]
   Object.entries(tailwindArgsObj).map((cur) => {
     if (tailwindToBeExtractedOptions.indexOf(cur[0]) > -1) {
       specificArgs.push(cur)
+      // 此处 findindex 找不到后返回的-1可能导致误删，但不可能找不到，即不做边界处理
+      restArgs.splice(restArgs.findIndex(val => val === cur[0]), 1)
+      cur[1] && restArgs.splice(restArgs.findIndex(val => val === cur[1]), 1)
+      // restArgs.filter((val) => val !== cur[0])
     }
   })
   specificArgsObj = Object.fromEntries(specificArgs)
+  restArgs = restArgs.join(' ')
   return {
     specificArgsObj,
     restArgs
@@ -142,15 +147,6 @@ const parseCliArgs = (() => {
     }
     return result
   } catch (err) {
-    // if (err.code === 'ARG_UNKNOWN_OPTION') {
-    //   help({
-    //     message: err.message,
-    //     usage: ['tailwindcss <command> [options]'],
-    //     options: sharedFlags,
-    //   })
-    //   process.exit(1)
-    // }
-    // throw err
   }
 })
 

@@ -1,10 +1,10 @@
-// #!/usr/bin/env node
-// const fs = require('fs/promises')
-// const shell = require('shelljs')
-// const path = require('path')
-// const execCli = require('./lib/cliExpand')
-// const { Logger } = require('./lib/util/index')
-// const autoImportSubPackageStyle = require('./lib/processSubpackage')
+#!/usr/bin/env node
+const fs = require('fs/promises')
+const shell = require('shelljs')
+const path = require('path')
+const execCli = require('./lib/cliExpand')
+const { Logger } = require('./lib/util/index')
+const autoImportSubPackageStyle = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
 
@@ -15,10 +15,6 @@ const globalConstants = {
   subPackageMap: new Map()
 }
 
-// 读取config并挂载到全局
-// resolveConfig()
-// 读取arg，并解析为config对象形式
-// arg对象，全局config，默认config三者合并
 const getFinalConfig = async () => {
   const mergedConfig = await getMergedConfig()
   const { specificArgsObj, restArgs } = getSpecificArgsObj(parseCliArgs())
@@ -53,24 +49,25 @@ mountFinalCfgToGlobal()
 //   // 以下为可选，合并策略待定
 //   configPath: ''
 // }
-// const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
+const { globalFinalConfig } = global
+const miniprogramAbsPath = path.resolve(__dirname, globalFinalConfig.miniprogramPath)
 
-// // 通过app.json构建map并挂载到全局
-// const setSubpackageMap = async () => {
-//   try {
-//     const data = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
-//     const jsonObject = JSON.parse(data)
-//     const subPackages = jsonObject.subPackages
-//     for (let i = 0, len = subPackages.length; i < len; i++) {
-//       let item = subPackages[i]
-//       let root = item.root
-//       const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
-//       globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
-//     }
-//   } catch (err) {
-//     throw err
-//   }
-// }
+// 通过app.json构建map并挂载到全局
+const setSubpackageMap = async () => {
+  try {
+    const data = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
+    const jsonObject = JSON.parse(data)
+    const subPackages = jsonObject.subPackages
+    for (let i = 0, len = subPackages.length; i < len; i++) {
+      let item = subPackages[i]
+      let root = item.root
+      const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
+      globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
+    }
+  } catch (err) {
+    throw err
+  }
+}
 
 // // classMode策略
 // // 输出当前策略提示
