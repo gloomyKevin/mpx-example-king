@@ -1,6 +1,7 @@
 /* 自定义配置 */
 module.exports = {
   // 小程序文件目录
+  // TODO 此处有问题，为hack路径，待修改
   miniprogramPath: '../dist/wx',
   // 'tailwindcss' 'windicss'
   classMode: 'tailwindcss',

@@ -49,6 +49,7 @@ function getSpecificArgsObj (tailwindArgsObj) {
   let specificArgs = []
   let specificArgsObj = {}
   let restArgs = [...process.argv.splice(2)]
+  // TODO 有bug，不能提取，待修复, 且cli无build则报错
   Object.entries(tailwindArgsObj).map((cur) => {
     if (tailwindToBeExtractedOptions.indexOf(cur[0]) > -1) {
       specificArgs.push(cur)

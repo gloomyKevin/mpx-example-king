@@ -37,7 +37,17 @@ const fileIsExist = async fileName => {
   return flag
 }
 
+const isEmptyArr = (obj) => {
+  return Array.prototype.isPrototypeOf(obj) && obj.length === 0
+}
+
+const type = (a) => {
+  return Object.prototype.toString.call(a).slice(8, -1)
+}
+
 module.exports = {
   Logger,
-  fileIsExist
+  fileIsExist,
+  isEmptyArr,
+  type
 }

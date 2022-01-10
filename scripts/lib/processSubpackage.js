@@ -2,17 +2,6 @@ const fs = require('fs/promises')
 const path = require('path')
 const { fileIsExist } = require('./util/index')
 
-// 基本配置
-const TailwindBaseConfig = {
-  // 样式隔离 styleIsolation 开启样式隔离
-  SWITCH_STYLE_ISOLATION: 'apply-shared'
-}
-
-const setPresetCfgContent = (subpackageRoot) => {
-  // TODO 根路径暂时先写死，后续统一改
-  return `../dist/wx/${subpackageRoot}/**/*.wxml`
-}
-
 /**
  * 配置样式隔离
  * @param {string} componentsFiles 组件目录下文件
@@ -48,7 +37,7 @@ const configStyleIsolation = async (componentsFiles, styleIsolation = TailwindBa
  * @param subPackageImportPath 导入 css 样式路径
  * @returns {Promise<void>}
  */
-const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath) => {
+const autoImportSubPkgStyle = async (subPackageAbsPath, subPackageImportPath) => {
   // 自动注入内容
   const autoImportStr = `@import "${path.relative(subPackageAbsPath, subPackageImportPath)}"; \n`
   const subPackageFiles = await fs.readdir(subPackageAbsPath)
@@ -77,9 +66,9 @@ const autoImportSubPackageStyle = async (subPackageAbsPath, subPackageImportPath
         await fs.writeFile(subAbsStylePath, autoImportStr)
       }
     } else if (subAbsFileStat.isDirectory()) {
-      await autoImportSubPackageStyle(subAbsFilePath, subPackageImportPath)
+      await autoImportSubPkgStyle(subAbsFilePath, subPackageImportPath)
     }
   }
 }
 
-module.exports = autoImportSubPackageStyle
+module.exports = autoImportSubPkgStyle
