@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs/promises')
-// const shell = require('shelljs')
 const path = require('path')
-// const execCli = require('./lib/cliExpand')
 const { Logger } = require('./lib/util/index')
 // const autoImportSubPackageStyle = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
@@ -15,11 +13,11 @@ const globalConstants = {
   subPackageMap: new Map()
 }
 
-let args
 const getFinalConfig = async () => {
   const mergedConfig = await getMergedConfig()
-  const { specificArgsObj, restArgs: args } = getSpecificArgsObj(parseCliArgs())
-  const finalConfig = Object.assign(globalConstants, mergedConfig, specificArgsObj)
+  const { specificArgsObj, restArgs } = getSpecificArgsObj(parseCliArgs())
+  const restArgsObj = { cliArgs: restArgs }
+  const finalConfig = Object.assign(globalConstants, mergedConfig, specificArgsObj, restArgsObj)
   return finalConfig
 }
 
@@ -68,6 +66,7 @@ const setSubpackageMap = async () => {
 //     subPackage: true,
 //     specSubPackage: []
 //   },
+//    cliArgs
 //   // 以下为可选，合并策略待定
 //   configPath: ''
 // }
@@ -120,8 +119,9 @@ const setSubpackageMap = async () => {
 
 // refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
 function execCliByCssMode (scanTaskQueue) {
+  const execCli = require('./lib/cliExpand')
   scanTaskQueue.forEach((toBeScannedPath) => {
-    // execCli(toBeScannedPath, args)
+    execCli(toBeScannedPath)
   })
 }
 
@@ -133,7 +133,7 @@ const asyncSchedule = async () => {
   const { globalFinalCfg: { cssMode } } = global
   const scanTaskQueue = await execScanStrategy(cssMode)
   console.log('%c [ scanTaskQueue ]-135', 'font-size:13px; background:pink; color:#bf2c9f;', scanTaskQueue)
-  // await execCliByCssMode(scanTaskQueue)
+  await execCliByCssMode(scanTaskQueue)
 }
 
 // // TODO 接入postcss提重入口
