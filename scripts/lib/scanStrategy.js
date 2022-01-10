@@ -3,7 +3,7 @@ const path = require('path')
 // 在windi中，则直接作为参数传入
 let scanTaskQueue = []
 const { globalFinalConfig: { subPackageMap, cssMode, miniprogramPath } } = global
-const allSubpackagePath = [subPackageMap.keys()]
+const allSubpackagePath = [...subPackageMap.keys()]
 const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
 
 // TODO 添加并行的 auto import 和 apply shared 方法
@@ -28,8 +28,8 @@ const scanStrategy = {
   }
 }
 
-function execScanStrategy (mode) {
-  const { mainPackage, subPackage, specSubPackage } = mode
+function execScanStrategy (scanMode) {
+  const { mainPackage, subPackage, specSubPackage } = scanMode
   if (mainPackage && !subPackage && !specSubPackage) {
     scanStrategy['onlyMainPkg']()
   }

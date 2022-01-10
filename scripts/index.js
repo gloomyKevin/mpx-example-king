@@ -37,9 +37,9 @@ const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
 // 通过app.json构建map并挂载到全局
 const setSubpackageMap = async () => {
   try {
-    const data = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
-    const jsonObject = JSON.parse(data)
-    const subPackages = jsonObject.subPackages
+    const appContent = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
+    const appContentObject = JSON.parse(appContent)
+    const subPackages = appContentObject.subPackages
     for (let i = 0, len = subPackages.length; i < len; i++) {
       let item = subPackages[i]
       let root = item.root
@@ -106,9 +106,6 @@ setSubpackageMap()
 //           // Logger.error('sorry, this script requires npx, please update npm version!')
 //           shell.exit(1)
 //         }
-//         // only for test
-//         // let res = setPresetCfgContent(globalFinalConfig.subPackageMap.get(currentAbsPath).root)
-//         // createContent(res)
 //         execCli(args, outputPath)
 //         // 自动导入分包样式
 //         await autoImportSubPackageStyle(currentAbsPath, outputPath)
@@ -128,6 +125,8 @@ function execCliByCssMode () {
     execCli(toBeScannedPath, args)
   })
 }
+
+// TODO 接入postcss提重入口
 
 async function init () {
   Logger.warning('==========tailwind compile start==========')

@@ -7,10 +7,9 @@
 const shell = require('shelljs')
 const path = require('path')
 const { Logger } = require('./lib/util/index')
-const { globalFinalConfig } = global
+const { globalFinalConfig: { classMode } } = global
 
 module.exports = function execCli (execCliPath, cliArgs) {
-  const { classMode } = globalFinalConfig
   if (classMode === 'tailwindcss') {
     injectTailwindcss()
   } else if (classMode === 'windicss') {
@@ -19,7 +18,6 @@ module.exports = function execCli (execCliPath, cliArgs) {
     console.error('input illegal')
   }
 
-  // 不对外暴露自定义
   function _setInputPath () {
     return path.resolve(__dirname, '../presets/tailwindPreset/tailwind.css')
   }
@@ -28,8 +26,10 @@ module.exports = function execCli (execCliPath, cliArgs) {
     return path.resolve(execCliPath, './index.wxss')
   }
 
+  // 每次循环中，config.content都要动态改变
   function setConfigPath () {
     // TODO 修改为globalFinalConfig的configPath
+    const presetCfgContent = `${execCliPath}/**/*.wxml`
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
