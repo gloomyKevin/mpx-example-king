@@ -2,12 +2,11 @@
 const fs = require('fs/promises')
 // const shell = require('shelljs')
 const path = require('path')
-const execCli = require('./lib/cliExpand')
+// const execCli = require('./lib/cliExpand')
 const { Logger } = require('./lib/util/index')
 // const autoImportSubPackageStyle = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
-const scanTaskQueue = require('./lib/scanStrategy')
 
 const globalConstants = {
   // 样式隔离 styleIsolation 开启样式隔离
@@ -21,21 +20,22 @@ const getFinalConfig = async () => {
   const mergedConfig = await getMergedConfig()
   const { specificArgsObj, restArgs: args } = getSpecificArgsObj(parseCliArgs())
   const finalConfig = Object.assign(globalConstants, mergedConfig, specificArgsObj)
-  console.log('finalConfig: ', finalConfig)
   return finalConfig
 }
 
 const mountFinalCfgToGlobal = async () => {
   // const globalCfg = getFinalConfig()
   global.globalFinalCfg = await getFinalConfig()
+  // const { globalFinalConfig: { miniprogramPath } } = global
+  const miniprogramPath = global.globalFinalCfg.miniprogramPath
+  const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
+  global.globalFinalCfg.miniprogramAbsPath = miniprogramAbsPath
 }
-mountFinalCfgToGlobal()
+// mountFinalCfgToGlobal()
 
-const { globalFinalConfig: { miniprogramPath } } = global
-const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
-
-// 通过app.json构建map并挂载到全局
+// // 通过app.json构建map并挂载到全局
 const setSubpackageMap = async () => {
+  const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
   try {
     const appContent = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
     const appContentObject = JSON.parse(appContent)
@@ -44,13 +44,12 @@ const setSubpackageMap = async () => {
       let item = subPackages[i]
       let root = item.root
       const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
-      global.globalFinalConfig.subPackageMap.set(resolveSubPackagePath, item)
+      global.globalFinalCfg.subPackageMap.set(resolveSubPackagePath, item)
     }
   } catch (err) {
     throw err
   }
 }
-setSubpackageMap()
 
 // globalFinalConfig 示例
 // const globalFinalConfig = {
@@ -120,18 +119,29 @@ setSubpackageMap()
 // }
 
 // refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
-function execCliByCssMode () {
+function execCliByCssMode (scanTaskQueue) {
   scanTaskQueue.forEach((toBeScannedPath) => {
-    execCli(toBeScannedPath, args)
+    // execCli(toBeScannedPath, args)
   })
 }
 
-// TODO 接入postcss提重入口
+const asyncSchedule = async () => {
+  await mountFinalCfgToGlobal()
+  await setSubpackageMap()
+  console.log('%c [ global.globalFinalCfg ]-34', 'font-size:13px; background:pink; color:#bf2c9f;', global.globalFinalCfg)
+  const execScanStrategy = require('./lib/scanStrategy')
+  const { globalFinalCfg: { cssMode } } = global
+  const scanTaskQueue = await execScanStrategy(cssMode)
+  console.log('%c [ scanTaskQueue ]-135', 'font-size:13px; background:pink; color:#bf2c9f;', scanTaskQueue)
+  // await execCliByCssMode(scanTaskQueue)
+}
+
+// // TODO 接入postcss提重入口
 
 async function init () {
   Logger.warning('==========tailwind compile start==========')
   console.time('tailwind build time')
-  await execCliByCssMode()
+  await asyncSchedule()
   Logger.warning('==========tailwind compile end==========')
   console.timeEnd('tailwind build time')
 }
