@@ -6,7 +6,7 @@
 
 const shell = require('shelljs')
 const path = require('path')
-const { Logger } = require('./lib/util/index')
+const { Logger } = require('./util/index')
 const { globalFinalConfig: { classMode } } = global
 
 module.exports = function execCli (execCliPath, cliArgs) {
