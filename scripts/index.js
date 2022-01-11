@@ -2,7 +2,6 @@
 const fs = require('fs/promises')
 const path = require('path')
 const { Logger } = require('./lib/util/index')
-const processSubPkg = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
 
@@ -121,7 +120,7 @@ const setSubpackageMap = async () => {
 // }
 
 // refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
-function execCliByCssMode (scanTaskQueue) {
+function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
   scanTaskQueue.forEach((toBeScannedPath) => {
     execCli(toBeScannedPath)
@@ -136,8 +135,9 @@ const asyncSchedule = async () => {
   const { globalFinalCfg: { cssMode } } = global
   const { scanTaskQueue, queuePagesPath } = await execScanStrategy(cssMode)
   console.log('%c [ scanTaskQueue ]-135', 'font-size:13px; background:pink; color:#bf2c9f;', scanTaskQueue)
-  processSubPkg(queuePagesPath, scanTaskQueue)
-  await execCliByCssMode(scanTaskQueue)
+  const processSubPkg = require('./lib/processSubpackage')
+  await processSubPkg(queuePagesPath, ...scanTaskQueue)
+  await execCliByCssMode(...scanTaskQueue)
 }
 
 // // TODO 接入postcss提重入口
