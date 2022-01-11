@@ -41,7 +41,8 @@ function execCli (execCliPath) {
       Logger.error('sorry, this script requires npx, please update npm version!')
       shell.exit(1)
     }
-    shell.exec(`npx tailwindcss ${cliArgs} -c ${setConfigPath()} -i ${_setInputPath()} -o ${_setOutputPath()}`)
+    console.log('======mock tailwind run======')
+    // shell.exec(`npx tailwindcss ${cliArgs} -c ${setConfigPath()} -i ${_setInputPath()} -o ${_setOutputPath()}`)
     // console.log('%c [ cliArgs ]-43', 'font-size:13px; background:pink; color:#bf2c9f;', cliArgs)
     // console.log('%c [ _setOutputPath() ]-44', 'font-size:13px; background:pink; color:#bf2c9f;', _setOutputPath())
     // console.log('%c [ _setInputPath() ]-44', 'font-size:13px; background:pink; color:#bf2c9f;', _setInputPath())

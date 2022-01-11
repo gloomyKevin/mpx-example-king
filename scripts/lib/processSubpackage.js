@@ -4,6 +4,7 @@ const path = require('path')
 // const { fileIsExist } = require('./util/index')
 // const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
 const subPackageMap = global.globalFinalCfg.subPackageMap
+const SWITCH_STYLE_ISOLATION = global.globalFinalCfg.SWITCH_STYLE_ISOLATION
 const subPkgPath = [...subPackageMap.keys()]
 
 // 思路：从两个维度作区分
@@ -24,9 +25,10 @@ const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
       pageJSONFile.push(path.resolve(scanTaskPkg, `${taskPagePath}.json`))
       // 直接获取到 pagesPath.wxml，执行 自动import
       // TODO 拼出的路径有问题
-      const taskPageStylePath = path.resolve(scanTaskPkg, `${taskPagePath}.wxss`)
-      pageWXSSFile.push(taskPageStylePath)
-      // pagesImportStyle(taskPageStylePath)
+      const pageWXSSPath = path.resolve(scanTaskPkg, `${taskPagePath}.wxss`)
+      pageWXSSFile.push(pageWXSSPath)
+
+      pagesImportStyle(pageWXSSPath, scanTaskPkg)
     })
     console.log('======当前扫描得到页面.wxss=====', pageWXSSFile)
 
@@ -42,23 +44,37 @@ const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
       return !pageJSONFile.includes(WXSSFile)
     })
     console.log('=====当前扫描得到组件.json=====', componentsWXSSFile)
-    // componentsOpenApplyShared(componentsWXSSFile)
+    componentsOpenApplyShared(...componentsWXSSFile)
   })
 }
 
-const pagesImportStyle = (...pagePath) => {
-  // 待注入语句
-  // const autoImportStatement = `@import "${path.relative(subPackageAbsPath, subPackageImportPath)}"; \n`
+// 页面的wxss文件import当前分包下打出的样式
+// TODO 边界处理：防止重复注入 & 无wxss则开启（文件需要正确命名）
+const pagesImportStyle = async (pageWXSSPath, tailwindOutputDir) => {
+  console.log('%c [ tailwindOutputDir ]-52', 'font-size:13px; background:pink; color:#bf2c9f;', tailwindOutputDir)
+  console.log('%c [ pageWXSSPath ]-52', 'font-size:13px; background:pink; color:#bf2c9f;', pageWXSSPath)
+  // TODO 路径有问题
+  // const autoImportStatement = `@import "${path.relative(tailwindOutputDir, pageWXSSPath)}"; \n`
+  const autoImportStatement = `@import "${path.relative(pageWXSSPath, tailwindOutputDir)}"; \n`
   // 首行写入语句
-  // fs.writeFile(subAbsStylePath, `${autoImportStr} ${data}`)
+  let WXSSContent = await fs.readFile(pageWXSSPath, 'utf-8')
+  await fs.writeFile(pageWXSSPath, `${autoImportStatement} ${WXSSContent}`)
 }
 
-const componentsOpenApplyShared = (...componentPath) => {
-
+// 组件的json文件校验并开启apply-shared
+const componentsOpenApplyShared = async (...cmpJSONPathArr) => {
+  // TODO 用户已配置styleIsolation时，增加策略及提示
+  for (let curCmpJSONPath of cmpJSONPathArr) {
+    const curCmpJSONContent = await fs.readFile(curCmpJSONPath, 'utf-8')
+    const jsonObject = JSON.parse(curCmpJSONContent)
+    if (!jsonObject.styleIsolation) {
+      jsonObject.styleIsolation = SWITCH_STYLE_ISOLATION
+    }
+    await fs.writeFile(curCmpJSONPath, JSON.stringify(jsonObject))
+  }
 }
 
 module.exports = processSubPkg
-
 
 // /**
 //  * 配置样式隔离
