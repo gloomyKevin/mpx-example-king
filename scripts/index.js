@@ -2,7 +2,7 @@
 const fs = require('fs/promises')
 const path = require('path')
 const { Logger } = require('./lib/util/index')
-// const autoImportSubPackageStyle = require('./lib/processSubpackage')
+const processSubPkg = require('./lib/processSubpackage')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
 
@@ -10,7 +10,9 @@ const globalConstants = {
   // 样式隔离 styleIsolation 开启样式隔离
   SWITCH_STYLE_ISOLATION: 'apply-shared',
   // map 存储 app.json 中的分包
-  subPackageMap: new Map()
+  subPackageMap: new Map(),
+  // 主包页面路径
+  mainPkgPagesPath: []
 }
 
 const getFinalConfig = async () => {
@@ -37,6 +39,7 @@ const setSubpackageMap = async () => {
   try {
     const appContent = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
     const appContentObject = JSON.parse(appContent)
+    global.globalFinalCfg.mainPkgPagesPath = appContentObject.pages
     const subPackages = appContentObject.subPackages
     for (let i = 0, len = subPackages.length; i < len; i++) {
       let item = subPackages[i]
@@ -131,8 +134,9 @@ const asyncSchedule = async () => {
   console.log('%c [ global.globalFinalCfg ]-34', 'font-size:13px; background:pink; color:#bf2c9f;', global.globalFinalCfg)
   const execScanStrategy = require('./lib/scanStrategy')
   const { globalFinalCfg: { cssMode } } = global
-  const scanTaskQueue = await execScanStrategy(cssMode)
+  const { scanTaskQueue, queuePagesPath } = await execScanStrategy(cssMode)
   console.log('%c [ scanTaskQueue ]-135', 'font-size:13px; background:pink; color:#bf2c9f;', scanTaskQueue)
+  processSubPkg(queuePagesPath, scanTaskQueue)
   await execCliByCssMode(scanTaskQueue)
 }
 
