@@ -11,15 +11,11 @@
 </script>
 
 <style>
-  /* .bg-purple-300 {
-    --tw-bg-opacity: 1;
-    background-color: rgba(196, 181, 253, var(--tw-bg-opacity));
-  } */
 </style>
 
 <script type="application/json">
   {
-    "styleIsolation": "apply-shared",
+    // "styleIsolation": "apply-shared",
     "component": true,
     "usingComponents": {}
   }
