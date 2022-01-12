@@ -2,6 +2,7 @@ const path = require('path')
 const { isEmptyArr, type } = require('./util/index')
 // 待扫描目录队列，直接对照执行 cli
 // 在windi中，则直接作为参数传入
+// TODO 修改为set解决重复输入
 let scanTaskQueue = []
 // scanTaskQueue中对应的对应的page路径
 let queuePagesPath = new Map()

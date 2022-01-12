@@ -28,7 +28,7 @@ const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
       const pageWXSSPath = path.resolve(scanTaskPkg, `${taskPagePath}.wxss`)
       pageWXSSFile.push(pageWXSSPath)
 
-      pagesImportStyle(pageWXSSPath, scanTaskPkg)
+      // pagesImportStyle(pageWXSSPath, scanTaskPkg)
     })
     console.log('======当前扫描得到页面.wxss=====', pageWXSSFile)
 

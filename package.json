@@ -19,7 +19,7 @@
     "build:dll": "node ./build/buildDll.js",
     "help": "node ./build/build.js --help",
     "commonClass": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss'",
-    "tail:cli": "npx tailwindcss build -i ./scripts/presets/tailwindPreset/tailwind.css -c ./scripts/tailwind.config.js -o ./tailwindOutput.wxss"
+    "tail:cli": "npx tailwindcss build -c /Users/didi/Desktop/自己的项目/mpx-example/scripts/tailwind.config.js -i /Users/didi/Desktop/自己的项目/mpx-example/scripts/presets/tailwindPreset/tailwind.css -o /Users/didi/Desktop/自己的项目/mpx-example/dist/wx/subpackage1/index.wxss"
   },
   "author": "gloomyKevin",
   "license": "ISC",
