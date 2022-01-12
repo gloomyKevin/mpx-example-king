@@ -3,7 +3,7 @@ const { isEmptyArr, type, Logger } = require('./util/index')
 // 待扫描目录队列，直接对照执行 cli
 // 在windi中，则直接作为参数传入
 // TODO 修改为set解决重复输入
-const scanTaskQueue = []
+let scanTaskQueue = []
 // scanTaskQueue中对应的对应的page路径
 const queuePagesPath = new Map()
 const { globalFinalCfg: { subPackageMap, miniprogramPath, mainPkgPagesPath } } = global
@@ -15,7 +15,7 @@ function normalizeSpecSubPkg (...specArr) {
   let breakFlag = false
   let normalizedArr = []
   if (isEmptyArr([...specArr])) return
-  // forEach不可中断循环，故使用常规循环
+  // forEach不可中断循环，故使用常规迭代
   // TODO 考虑要不要把两种报错改为唯一的catch输入违法报错
   for (let specRootName of [...specArr]) {
     if (type(specRootName) !== 'String') {
