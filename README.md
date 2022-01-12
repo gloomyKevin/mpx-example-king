@@ -7,14 +7,15 @@
 ### 1. 脚手架
 ```bash
 // cssMode 配置为 tailwindcss
-// 完全遵循tailwind cli，config中指定必填xxx后，直接执行mini即可
+// 完全支持tailwind cli原有参数
 /// 优先级为mini cli参数 > 自定义 config 配置 > 默认 config 配置
-mini
-mini -c configPath -i inputPath -o outPath ...other arguments
+mini build
+mini build <...other tailwind cli args, can't use --input --output>
 
 // cssMode 配置为 windicss
-mini
-
+// 确认已提前安装windicss cli
+npm i -g windicss
+mini build
 ```
 ### 2. 接入watch
 需要在项目的构建完成之后调用 accessWatch 暴露出来的方法
@@ -53,7 +54,8 @@ module.exports = {
   cssMode: {
     mainPackage: true,
     subPackage: true,
-    specSubPackage: []
+    // 置空则默认处理所有分包
+    specSubPackage: ['subpackage name1', 'subpackage name2']
   }
 }
 ```

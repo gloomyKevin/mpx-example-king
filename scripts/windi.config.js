@@ -1,3 +1,5 @@
+const colors = require('windicss/colors')
+const typography = require('windicss/plugin/typography')
 const { defaultPreset, createPreset } = require('mpx-tailwindcss-preset')
 
 module.exports = {
@@ -7,5 +9,4 @@ module.exports = {
     //   rem2rpx: false
     // })
   ]
-  // content: ['./dist/wx/**/*.wxml']
 }

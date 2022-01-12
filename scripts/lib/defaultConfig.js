@@ -3,7 +3,7 @@ module.exports = {
   // 小程序文件目录
   miniprogramPath: '../dist/wx',
   // 'tailwindcss' 'windicss'
-  classMode: 'tailwindcss',
+  classMode: 'windicss',
   // 样式生成策略
   cssMode: {
     mainPackage: true,
