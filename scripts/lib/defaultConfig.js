@@ -9,7 +9,7 @@ module.exports = {
     mainPackage: true,
     subPackage: true,
     // TODO hack路径，待修改
-    specSubPackage: ['subpackage2']
+    specSubPackage: ['subpackage1']
   },
   testKey: 1,
   // 以下为可选，合并策略待定

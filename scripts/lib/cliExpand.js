@@ -25,28 +25,36 @@ function execCli (execCliPath) {
   }
 
   function _setOutputPath () {
-    return path.resolve(execCliPath, './index.wxss')
+    return path.resolve(execCliPath, './output.wxss')
   }
 
-  // 每次循环中，config.content都要动态改变
   function setConfigPath () {
     // TODO 修改为globalFinalConfig的configPath
-    const presetCfgContent = `${execCliPath}/**/*.wxml`
+    // const tailwindConfig = require('../tailwind.config')
+    // tailwindConfig.content = presetCfgContent
+    // console.log('%c [ tailwindConfig.content ]-38', 'font-size:13px; background:pink; color:#bf2c9f;', tailwindConfig.content)
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
-  function injectTailwindcss () {
+  function _setContentPath () {
+    const relativePath = path.relative('/Users/didi/Desktop/自己的项目/mpx-example', execCliPath)
+    const presetCfgContent = `./${relativePath}/**/*.wxml`
+    return presetCfgContent
+  }
+
+  async function injectTailwindcss () {
     // TODO 改为 不支持npx时直接执行文件
     if (!shell.which('npx')) {
       Logger.error('sorry, this script requires npx, please update npm version!')
       shell.exit(1)
     }
-    console.log('======mock tailwind run======')
-    // shell.exec(`npx tailwindcss ${cliArgs} -c ${setConfigPath()} -i ${_setInputPath()} -o ${_setOutputPath()}`)
-    // console.log('%c [ cliArgs ]-43', 'font-size:13px; background:pink; color:#bf2c9f;', cliArgs)
-    // console.log('%c [ _setOutputPath() ]-44', 'font-size:13px; background:pink; color:#bf2c9f;', _setOutputPath())
-    // console.log('%c [ _setInputPath() ]-44', 'font-size:13px; background:pink; color:#bf2c9f;', _setInputPath())
-    // console.log('%c [ setConfigPath() ]-44', 'font-size:13px; background:pink; color:#bf2c9f;', setConfigPath())
+
+    const configPath = setConfigPath()
+    const outputPath = _setOutputPath()
+    const inputPath = _setInputPath()
+    const contantPath = _setContentPath()
+    shell.exec(`npx tailwindcss --config '${configPath}' -i '${inputPath}' -o '${outputPath}' --content '${contantPath}' ${cliArgs}`)
+    // console.log('=====cli:', `npx tailwindcss ${cliArgs} --config ${configPath} -i ${inputPath} -o ${outputPath} --content '${presetCfgContent}' ${cliArgs}`)
   }
 
   // function injectWindicss () {

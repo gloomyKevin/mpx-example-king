@@ -122,9 +122,10 @@ const setSubpackageMap = async () => {
 // refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
 function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
-  scanTaskQueue.forEach((toBeScannedPath) => {
+  // 因为里面有async/await操作，所以不使用forEach
+  for (let toBeScannedPath of scanTaskQueue) {
     execCli(toBeScannedPath)
-  })
+  }
 }
 
 const asyncSchedule = async () => {
@@ -140,7 +141,7 @@ const asyncSchedule = async () => {
   await execCliByCssMode(...scanTaskQueue)
 }
 
-// // TODO 接入postcss提重入口
+// TODO 接入postcss提重入口
 
 async function init () {
   Logger.warning('==========tailwind compile start==========')
