@@ -12,10 +12,14 @@ const classMode = global.globalFinalCfg.classMode
 const cliArgs = global.globalFinalCfg.cliArgs
 
 function execCli (execCliPath) {
+  const configPath = setConfigPath()
+  const outputPath = _setOutputPath()
+  const inputPath = _setInputPath()
+  const contentPath = _setContentPath()
   if (classMode === 'tailwindcss') {
     injectTailwindcss()
   } else if (classMode === 'windicss') {
-    // injectWindicss()
+    injectWindicss()
   } else {
     Logger.error('classMode输入错误，必须为 tailwindcss 或 windicss')
   }
@@ -45,20 +49,15 @@ function execCli (execCliPath) {
       Logger.error('sorry, this script requires npx, please update npm version!')
       shell.exit(1)
     }
-
-    const configPath = setConfigPath()
-    const outputPath = _setOutputPath()
-    const inputPath = _setInputPath()
-    const contentPath = _setContentPath()
     // TODO只有主包时，传入主包wxml路径集，注意异步顺序
     // TODO 配置中增加实验开关，copy cli，增加多输入和多输出的映射，并实现多输出
     shell.exec(`npx tailwindcss --config '${configPath}' -i '${inputPath}' -o '${outputPath}' --content '${contentPath}' ${cliArgs}`)
     // console.log('=====cli:', `npx tailwindcss ${cliArgs} --config ${configPath} -i ${inputPath} -o ${outputPath} --content '${presetCfgContent}' ${cliArgs}`)
   }
 
-  // function injectWindicss () {
-  //   shell.exec(`windicss '${inputPath}' -f ${configPath} -o ${outPath} ${normalizeInjectArgvs()}`)
-  // }
+  function injectWindicss () {
+    shell.exec(`windicss '${contentPath}' -f '${configPath}' -o '${outputPath}' ${cliArgs}`)
+  }
 }
 
 module.exports = execCli
