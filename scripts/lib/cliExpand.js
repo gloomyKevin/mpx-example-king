@@ -50,6 +50,8 @@ function execCli (execCliPath) {
     const outputPath = _setOutputPath()
     const inputPath = _setInputPath()
     const contentPath = _setContentPath()
+    // TODO只有主包时，传入主包wxml路径集，注意异步顺序
+    // TODO 配置中增加实验开关，copy cli，增加多输入和多输出的映射，并实现多输出
     shell.exec(`npx tailwindcss --config '${configPath}' -i '${inputPath}' -o '${outputPath}' --content '${contentPath}' ${cliArgs}`)
     // console.log('=====cli:', `npx tailwindcss ${cliArgs} --config ${configPath} -i ${inputPath} -o ${outputPath} --content '${presetCfgContent}' ${cliArgs}`)
   }
