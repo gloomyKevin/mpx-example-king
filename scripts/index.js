@@ -8,9 +8,9 @@ const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
 const globalConstants = {
   // 样式隔离 styleIsolation 开启样式隔离
   SWITCH_STYLE_ISOLATION: 'apply-shared',
-  // map 存储 app.json 中的分包
+  // map 存储 app.json 中的分包信息
   subPackageMap: new Map(),
-  // 主包页面路径
+  // 注册在主包的页面路径
   mainPkgPagesPath: []
 }
 
@@ -23,29 +23,29 @@ const getFinalConfig = async () => {
 }
 
 const mountFinalCfgToGlobal = async () => {
-  // const globalCfg = getFinalConfig()
-  global.globalFinalCfg = await getFinalConfig()
   // const { globalFinalConfig: { miniprogramPath } } = global
+  // 后面的同类型写法：为啥解构赋值报错
   const miniprogramPath = global.globalFinalCfg.miniprogramPath
-  const miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
-  global.globalFinalCfg.miniprogramAbsPath = miniprogramAbsPath
+  global.globalFinalCfg.miniprogramAbsPath = path.resolve(__dirname, miniprogramPath)
 }
-// mountFinalCfgToGlobal()
 
-// // 通过app.json构建map并挂载到全局
+// 通过app.json构建map并挂载到全局
 const setSubpackageMap = async () => {
+  // let { globalFinalConfig: { miniprogramAbsPath } } = global
   const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
   try {
     const appContent = await fs.readFile(path.resolve(miniprogramAbsPath, './app.json'), 'utf8')
     const appContentObject = JSON.parse(appContent)
     global.globalFinalCfg.mainPkgPagesPath = appContentObject.pages
-    const subPackages = appContentObject.subPackages
-    for (let i = 0, len = subPackages.length; i < len; i++) {
-      let item = subPackages[i]
-      let root = item.root
-      const resolveSubPackagePath = path.resolve(miniprogramAbsPath, root)
-      global.globalFinalCfg.subPackageMap.set(resolveSubPackagePath, item)
+    const subPackages = appContentObject?.subPackages
+    if (!subPackages) {
+      // 用户如果没配置分包，则校验配置，warning并默认走主包输出配置
     }
+    subPackages.forEach((curSubPkg, index) => {
+      const subPkgRootName = curSubPkg.root
+      const subPkgAbsPath = path.resolve(miniprogramAbsPath, subPkgRootName)
+      global.globalFinalCfg.subPackageMap.set(subPkgAbsPath, curSubPkg)
+    })
   } catch (err) {
     throw err
   }
@@ -72,9 +72,6 @@ const setSubpackageMap = async () => {
 //   // 以下为可选，合并策略待定
 //   configPath: ''
 // }
-
-// // classMode策略
-// // 输出当前策略提示
 
 // // 以下为tailwind的build模式
 // // tailwindBuild()
@@ -119,28 +116,30 @@ const setSubpackageMap = async () => {
 //   }
 // }
 
-// refactor: 重写recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
+// refactor: 重写原recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
 function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
-  // 因为里面有async/await操作，所以不使用forEach
-  for (let toBeScannedPath of scanTaskQueue) {
+  scanTaskQueue.forEach((toBeScannedPath) => {
     execCli(toBeScannedPath)
-  }
+  })
 }
 
 const asyncSchedule = async () => {
+  global.globalFinalCfg = await getFinalConfig()
   await mountFinalCfgToGlobal()
   await setSubpackageMap()
-  console.log('%c [ global.globalFinalCfg ]-34', 'font-size:13px; background:pink; color:#bf2c9f;', global.globalFinalCfg)
+  // console.log('======全局配置======', global.globalFinalCfg)
   const execScanStrategy = require('./lib/scanStrategy')
   const { globalFinalCfg: { cssMode } } = global
   const { scanTaskQueue, queuePagesPath } = await execScanStrategy(cssMode)
-  console.log('%c [ scanTaskQueue ]-135', 'font-size:13px; background:pink; color:#bf2c9f;', scanTaskQueue)
+  // console.log('======待扫描队列======', scanTaskQueue)
   const processSubPkg = require('./lib/processSubpackage')
   await processSubPkg(queuePagesPath, ...scanTaskQueue)
   await execCliByCssMode(...scanTaskQueue)
 }
 
+// TODO 重复执行cli时间损耗较大，考虑优化或者 例如 开发模式下变成只生成主包模式
+// TODO rebuild 时，检测到上次残留文件则删除，或者先全量删除（在没有watch前）
 // TODO 接入postcss提重入口
 
 async function init () {

@@ -17,7 +17,7 @@ function execCli (execCliPath) {
   } else if (classMode === 'windicss') {
     // injectWindicss()
   } else {
-    console.error('input illegal')
+    Logger.error('classMode输入错误，必须为 tailwindcss 或 windicss')
   }
 
   function _setInputPath () {
@@ -30,9 +30,6 @@ function execCli (execCliPath) {
 
   function setConfigPath () {
     // TODO 修改为globalFinalConfig的configPath
-    // const tailwindConfig = require('../tailwind.config')
-    // tailwindConfig.content = presetCfgContent
-    // console.log('%c [ tailwindConfig.content ]-38', 'font-size:13px; background:pink; color:#bf2c9f;', tailwindConfig.content)
     return path.resolve(__dirname, '../tailwind.config.js')
   }
 
@@ -42,8 +39,8 @@ function execCli (execCliPath) {
     return presetCfgContent
   }
 
-  async function injectTailwindcss () {
-    // TODO 改为 不支持npx时直接执行文件
+  function injectTailwindcss () {
+    // TODO 改为 不支持npx时直接node执行文件
     if (!shell.which('npx')) {
       Logger.error('sorry, this script requires npx, please update npm version!')
       shell.exit(1)
@@ -52,8 +49,10 @@ function execCli (execCliPath) {
     const configPath = setConfigPath()
     const outputPath = _setOutputPath()
     const inputPath = _setInputPath()
-    const contantPath = _setContentPath()
-    shell.exec(`npx tailwindcss --config '${configPath}' -i '${inputPath}' -o '${outputPath}' --content '${contantPath}' ${cliArgs}`)
+    const contentPath = _setContentPath()
+    // TODO只有主包时，传入主包wxml路径集，注意异步顺序
+    // TODO 配置中增加实验开关，copy cli，增加多输入和多输出的映射，并实现多输出
+    shell.exec(`npx tailwindcss --config '${configPath}' -i '${inputPath}' -o '${outputPath}' --content '${contentPath}' ${cliArgs}`)
     // console.log('=====cli:', `npx tailwindcss ${cliArgs} --config ${configPath} -i ${inputPath} -o ${outputPath} --content '${presetCfgContent}' ${cliArgs}`)
   }
 

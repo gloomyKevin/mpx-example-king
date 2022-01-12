@@ -1,6 +1,6 @@
 const arg = require('arg')
 // tailwind中 需要从argv中提出并删除的option项
-const tailwindToBeExtractedOptions = ['--output']
+const tailwindToBeExtractedOptions = ['--config', '-c']
 let specificCommands = {
   // init: {
   //   args: {
@@ -50,6 +50,8 @@ function getSpecificArgsObj (tailwindArgsObj) {
   let specificArgsObj = {}
   let restArgs = [...process.argv.splice(2)]
   // TODO 有bug，不能提取，待修复, 且cli无build则报错
+  // TODO tailwindToBeExtractedOptions 有多项时无法处理
+  // 输入不可自定义项时添加输出
   Object.entries(tailwindArgsObj).map((cur) => {
     if (tailwindToBeExtractedOptions.indexOf(cur[0]) > -1) {
       specificArgs.push(cur)
@@ -90,7 +92,7 @@ let command = ((arg = '') => (arg.startsWith('-') ? undefined : arg))(process.ar
 // // Execute command
 let { args: flags } = specificCommands[command]
 
-const parseCliArgs = (() => {
+const parseCliArgs = () => (() => {
   try {
     let result = arg(
       Object.fromEntries(
@@ -102,45 +104,36 @@ const parseCliArgs = (() => {
       ),
       { permissive: true }
     )
-
     // Manual parsing of flags to allow for special flags like oneOf(Boolean, String)
     for (let i = result['_'].length - 1; i >= 0; --i) {
       let flag = result['_'][i]
       if (!flag.startsWith('-')) continue
-
       let flagName = flag
       let handler = flags[flag]
-
       // Resolve flagName & handler
       while (typeof handler === 'string') {
         flagName = handler
         handler = flags[handler]
       }
-
       if (!handler) continue
 
       let args = []
       let offset = i + 1
-
       // Parse args for current flag
       while (result['_'][offset] && !result['_'][offset].startsWith('-')) {
         args.push(result['_'][offset++])
       }
-
       // Cleanup manually parsed flags + args
       result['_'].splice(i, 1 + args.length)
-
       // Set the resolved value in the `result` object
       result[flagName] = handler.type(
         args.length === 0 ? undefined : args.length === 1 ? args[0] : args,
         flagName
       )
     }
-
     // // Ensure that the `command` is always the first argument in the `args`.
     // // This is important so that we don't have to check if a default command
     // // (build) was used or not from within each plugin.
-    // //
     // // E.g.: tailwindcss input.css -> _: ['build', 'input.css']
     // // E.g.: tailwindcss build input.css -> _: ['build', 'input.css']
     if (result['_'][0] !== command) {
