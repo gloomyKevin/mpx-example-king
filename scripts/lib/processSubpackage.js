@@ -18,7 +18,7 @@ const subPkgPath = [...subPackageMap.keys()]
 const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
   // pagesImportStyle 和 componentsOpenApplyShared 并行提速
   scanTaskQueue.forEach((scanTaskPkg) => {
-    console.log('======当前扫描范围======', scanTaskPkg)
+    // console.log('======当前扫描范围======', scanTaskPkg)
     const pageJSONFile = []
     const pageWXSSFile = []
     pagesPath.get(scanTaskPkg).forEach((taskPagePath) => {
@@ -30,7 +30,7 @@ const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
 
       // pagesImportStyle(pageWXSSPath, scanTaskPkg)
     })
-    console.log('======当前扫描得到页面.wxss=====', pageWXSSFile)
+    // console.log('======当前扫描得到页面.wxss=====', pageWXSSFile)
 
     // // 扫描得到全部.wxss后缀文件路径数组，剔除pagesPath路径，剩下为components路径，执行 apply-shred 校验与开启
     // // 在当前包范围内，扫描得到全部.wxss后缀文件路径数组
@@ -43,7 +43,7 @@ const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
     const componentsWXSSFile = allWXSSFile.filter((WXSSFile) => {
       return !pageJSONFile.includes(WXSSFile)
     })
-    console.log('=====当前扫描得到组件.json=====', componentsWXSSFile)
+    // console.log('=====当前扫描得到组件.json=====', componentsWXSSFile)
     componentsOpenApplyShared(...componentsWXSSFile)
   })
 }
