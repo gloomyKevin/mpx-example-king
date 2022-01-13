@@ -120,7 +120,7 @@ const setSubpackageMap = async () => {
 function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
   scanTaskQueue.forEach((toBeScannedPath) => {
-    execCli(toBeScannedPath)
+    execCli(toBeScannedPath, ...scanTaskQueue)
   })
 }
 

@@ -18,6 +18,7 @@ const subPkgPath = [...subPackageMap.keys()]
 const processSubPkg = async (pagesPath, ...scanTaskQueue) => {
   // pagesImportStyle 和 componentsOpenApplyShared 并行提速
   scanTaskQueue.forEach((scanTaskPkg) => {
+    // TDDO 路径输出只在tailwind debug模式下开启，windicss自带
     // console.log('======当前扫描范围======', scanTaskPkg)
     const pageJSONFile = []
     const pageWXSSFile = []
