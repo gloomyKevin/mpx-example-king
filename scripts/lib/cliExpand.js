@@ -10,8 +10,9 @@ const { Logger } = require('./util/index')
 // const { globalFinalConfig: { classMode, cliArgs } } = global
 const classMode = global.globalFinalCfg.classMode
 const cliArgs = global.globalFinalCfg.cliArgs
+const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
 
-function execCli (execCliPath) {
+function execCli (execCliPath, ...scanTaskQueue) {
   const configPath = setConfigPath()
   const outputPath = _setOutputPath()
   const inputPath = _setInputPath()
@@ -38,8 +39,20 @@ function execCli (execCliPath) {
   }
 
   function _setContentPath () {
+    let presetCfgContent = []
+    // 扫描主包时，在pattern中排除分包，考虑到rott可能为多层，需要动态分析处理，这里先只考虑单层分包
+    // TODO 这里的处理有点丑，看看能不能去掉scanTaskQueue传参
     const relativePath = path.relative('/Users/didi/Desktop/自己的项目/mpx-example', execCliPath)
-    const presetCfgContent = `./${relativePath}/**/*.wxml`
+    if (scanTaskQueue.includes(miniprogramAbsPath)) {
+      const extractSubPkgPatterns = []
+      scanTaskQueue.filter((path) => { return path !== miniprogramAbsPath }).forEach((subPkgAbsPath) => {
+        extractSubPkgPatterns.push(path.relative(miniprogramAbsPath, subPkgAbsPath))
+      })
+      const patternsStr = `!(${extractSubPkgPatterns.join('|')})`
+      presetCfgContent = `./${relativePath}/${patternsStr}/**/*.wxml`
+    } else {
+      presetCfgContent = `./${relativePath}/**/*.wxml`
+    }
     return presetCfgContent
   }
 

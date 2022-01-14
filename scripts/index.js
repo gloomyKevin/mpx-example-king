@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs/promises')
 const path = require('path')
+const fg = require('fast-glob')
 const { Logger } = require('./lib/util/index')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
@@ -116,11 +117,23 @@ const setSubpackageMap = async () => {
 //   }
 // }
 
+// 删除源文件
+// TODO 待对比全删和只删该次未用到文件，以及未来watch模式优化
+const deleteOldOutputFiles = async () => {
+  const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
+  const relativePath = path.relative('/Users/didi/Desktop/自己的项目/mpx-example', miniprogramAbsPath)
+  const projectRootPattern = fg.sync(`./${relativePath}/**/output.wxss`)
+  // TODO 是否有更优雅的批量删除api
+  projectRootPattern.forEach((outputFile) => {
+    fs.unlink(outputFile)
+  })
+}
+
 // refactor: 重写原recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
 function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
   scanTaskQueue.forEach((toBeScannedPath) => {
-    execCli(toBeScannedPath)
+    execCli(toBeScannedPath, ...scanTaskQueue)
   })
 }
 
@@ -135,6 +148,7 @@ const asyncSchedule = async () => {
   // console.log('======待扫描队列======', scanTaskQueue)
   const processSubPkg = require('./lib/processSubpackage')
   await processSubPkg(queuePagesPath, ...scanTaskQueue)
+  await deleteOldOutputFiles()
   await execCliByCssMode(...scanTaskQueue)
 }
 
