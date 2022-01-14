@@ -11,6 +11,7 @@ const { Logger } = require('./util/index')
 const classMode = global.globalFinalCfg.classMode
 const cliArgs = global.globalFinalCfg.cliArgs
 const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
+const subPackageMap = global.globalFinalCfg.subPackageMap
 
 function execCli (execCliPath, ...scanTaskQueue) {
   const configPath = setConfigPath()
@@ -45,7 +46,8 @@ function execCli (execCliPath, ...scanTaskQueue) {
     const relativePath = path.relative('/Users/didi/Desktop/自己的项目/mpx-example', execCliPath)
     if (scanTaskQueue.includes(miniprogramAbsPath)) {
       const extractSubPkgPatterns = []
-      scanTaskQueue.filter((path) => { return path !== miniprogramAbsPath }).forEach((subPkgAbsPath) => {
+      const AllSubPkgAbsPath = [...subPackageMap.keys()]
+      AllSubPkgAbsPath.forEach((subPkgAbsPath) => {
         extractSubPkgPatterns.push(path.relative(miniprogramAbsPath, subPkgAbsPath))
       })
       const patternsStr = `!(${extractSubPkgPatterns.join('|')})`
