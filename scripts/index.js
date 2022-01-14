@@ -2,6 +2,7 @@
 const fs = require('fs/promises')
 const path = require('path')
 const fg = require('fast-glob')
+const { getCommonClass } = require('mp-common-class')
 const { Logger } = require('./lib/util/index')
 const getMergedConfig = require('./lib/resolveConfig')
 const { getSpecificArgsObj, parseCliArgs } = require('./lib/resolveCliArgs')
@@ -129,6 +130,14 @@ const deleteOldOutputFiles = async () => {
   })
 }
 
+const extractSubPkgCommonStyle = async (...scanTaskQueue) => {
+  const miniprogramAbsPath = global.globalFinalCfg.miniprogramAbsPath
+  const subPkgAbsPath = scanTaskQueue.filter((curPkgAbsPath) => {
+    return curPkgAbsPath !== miniprogramAbsPath
+  })
+  getCommonClass({ weight: 1, css: 'output.wxss', commonCssName: 'common.wxss', mainfile: 'miniprogramAbsPath', subpackageArr: [...subPkgAbsPath] })
+}
+
 // refactor: 重写原recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
 function execCliByCssMode (...scanTaskQueue) {
   const execCli = require('./lib/cliExpand')
@@ -150,6 +159,7 @@ const asyncSchedule = async () => {
   await processSubPkg(queuePagesPath, ...scanTaskQueue)
   await deleteOldOutputFiles()
   await execCliByCssMode(...scanTaskQueue)
+  await extractSubPkgCommonStyle(...scanTaskQueue)
 }
 
 // TODO 重复执行cli时间损耗较大，考虑优化或者 例如 开发模式下变成只生成主包模式
