@@ -29,7 +29,7 @@
     "arg": "^5.0.1",
     "fast-glob": "^3.2.10",
     "glob": "^7.2.0",
-    "mp-common-class": "^1.0.0-beta18",
+    "mp-common-class": "^1.0.0-beta20",
     "shelljs": "^0.8.4",
     "vue": "^2.6.10",
     "vue-i18n": "^8.15.3"

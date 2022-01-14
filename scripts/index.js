@@ -135,7 +135,7 @@ const extractSubPkgCommonStyle = async (...scanTaskQueue) => {
   const subPkgAbsPath = scanTaskQueue.filter((curPkgAbsPath) => {
     return curPkgAbsPath !== miniprogramAbsPath
   })
-  getCommonClass({ weight: 1, css: 'output.wxss', commonCssName: 'common.wxss', mainfile: '/Users/didi/Desktop/CommonCsstest/mpx-example-king/dist/wx', subpackageArr: [...subPkgAbsPath] })
+  getCommonClass({ weight: 1, css: 'output.wxss', commonCssName: 'common.wxss', outputFilePath: '/Users/didi/Desktop/CommonCsstest/mpx-example-king/dist/wx', subpackageArr: [...subPkgAbsPath] })
 }
 
 // refactor: 重写原recursiveScanFiles，不靠循环驱动，而是靠遍历器驱动
