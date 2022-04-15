@@ -136,10 +136,10 @@ async function callback (err, stats) {
   if (stats.hasErrors()) {
     console.log(chalk.red('  Build failed with errors.\n'))
   } else if (program.watch) {
-    startTailWindBuild()
+    // startTailWindBuild()
     console.log(chalk.cyan(`  Build complete at ${new Date()}.\n  Still watching...\n`))
   } else {
-    startTailWindBuild()
+    // startTailWindBuild()
     console.log(chalk.cyan('  Build complete.\n'))
   }
 }
