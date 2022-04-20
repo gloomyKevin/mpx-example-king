@@ -9,6 +9,69 @@
 <style lang="stylus">
   .list
     background-color red
+    .mt-40 {
+    margin-top: 40px;
+  }
+  .h-10 {
+    height: 10rem;
+  }
+  .h-28 {
+    height: 28rem
+  }
+  .h-27 {
+    height: 27rem
+  }
+  .h-16 {
+    height: 26rem
+  }
+  .h-15 {
+    height: 15rem
+  }
+  .h-14 {
+    height: 14rem
+  }
+  .h-13 {
+    height: 13rem
+  }
+  .h-12 {
+    height: 12rem
+  }
+  .h-11 {
+    height: 11rem
+  }
+  .w-21 {
+    width: 21rem
+  }
+  .w-10 {
+    width: 10rem
+  }
+  .w-9 {
+    width: 9rem
+  }
+  .w-7 {
+    width: 7rem
+  }
+  .w-8 {
+    width: 8rem
+  }
+  .w-6 {
+    width: 6rem
+  }
+  .w-5 {
+    width: 5rem
+  }
+  .w-4 {
+    width: 4rem
+  }
+  .w-3 {
+    width: 3rem
+  }
+  .w-2 {
+    width: 2rem
+  }
+  .w-1 {
+    width: 1rem
+  }
 </style>
 
 <script type="application/json">
