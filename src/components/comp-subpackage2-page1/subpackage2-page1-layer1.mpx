@@ -75,9 +75,6 @@
   .w-1 {
     width: 1rem
   }
-  #id-class {
-    padding: 10px
-  }
 </style>
 
 <script type="application/json">
