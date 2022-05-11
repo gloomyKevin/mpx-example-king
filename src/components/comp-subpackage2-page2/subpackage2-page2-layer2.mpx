@@ -74,6 +74,12 @@
   .w-1 {
     width: 1rem
   }
+  .part2-class {
+    width: 5rem
+  }
+  .subpackage2 {
+    width: 4rem
+  }
 </style>
 
 <script type="application/json">

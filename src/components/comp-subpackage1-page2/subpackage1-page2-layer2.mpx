@@ -74,6 +74,9 @@
   .w-1 {
     width: 1rem
   }
+  .subpackage1 {
+    width: 4rem
+  }
 </style>
 
 <script type="application/json">

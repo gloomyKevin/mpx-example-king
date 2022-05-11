@@ -77,6 +77,9 @@
   #id-class {
     padding: 10px
   }
+  .subpackage1 {
+    width: 4rem
+  }
 </style>
 
 <script type="application/json">

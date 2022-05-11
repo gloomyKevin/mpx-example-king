@@ -75,6 +75,9 @@
   .w-1 {
     width: 1rem
   }
+  .part2-class {
+    width: 5rem
+  }
 </style>
 
 <script type="application/json">
