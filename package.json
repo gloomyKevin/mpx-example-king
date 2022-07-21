@@ -18,9 +18,10 @@
     "build:test": "npm run build && jest",
     "build:dll": "node ./build/buildDll.js",
     "help": "node ./build/build.js --help",
-    "commonClass:all": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss'",
-    "commonClass:part": "mpCommonClass -m -s 'testCommon' 'dist/wx' 'wxss' 'subpackage2'",
-    "commonClass:subpackage": "mpCommonClass -s 'testCommon' 'dist/wx' 'wxss' 'subpackage1,subpackage2'"
+    "commonClass:all": "mpCommonClass -m -s  'dist/wx' 'wxss' 'testCommon'",
+    "commonClass:part": "mpCommonClass -m -s  'dist/wx' 'wxss' 'subpackage2' 'testCommon'",
+    "commonClass:subpackage": "mpCommonClass -s  'dist/wx' 'wxss' 'subpackage1,subpackage2' 'testCommon'",
+    "commonClass:look": "mpCommonClass -e  'dist/wx' 'wxss' 'subpackage1'"
   },
   "author": "gloomyKevin",
   "license": "ISC",
@@ -30,7 +31,7 @@
     "arg": "^5.0.1",
     "fast-glob": "^3.2.10",
     "glob": "^7.2.0",
-    "mp-common-class": "^1.0.0-beta27",
+    "mp-common-class": "^1.0.0-beta29",
     "shelljs": "^0.8.4",
     "vue": "^2.6.10",
     "vue-i18n": "^8.15.3"
